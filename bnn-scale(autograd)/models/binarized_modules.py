@@ -8,14 +8,30 @@ from torch.nn.parameter import Parameter
 
 import numpy as np
 
+class Binarize(Function):
+    @staticmethod
+    def forward(ctx, tensor):
+        ctx.save_for_backward(tensor)
+        #if quant_mode == 'det':
+        out =  tensor.sign()
+        return out
+        #else:
+        #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
 
+    @staticmethod
+    def backward(ctx, grad_output):
+        input= ctx.saved_tensors
+        grad_input = (1 - torch.pow(torch.tanh(input), 2)) * grad_output
+        return grad_input, None, None
+
+'''
 def Binarize(tensor,quant_mode='det'):
-    if quant_mode=='det':
-        return tensor.sign()
-    else:
-        return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
+       if quant_mode == 'det':
+            return tensor.sign()
 
-
+        else:
+            return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
+'''
 
 
 class HingeLoss(nn.Module):
