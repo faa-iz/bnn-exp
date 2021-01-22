@@ -20,8 +20,8 @@ class Binarize(Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        input= ctx.saved_tensors
-        grad_input = (1 - torch.pow(torch.tanh(input), 2)) * grad_output
+        tensor= ctx.saved_tensors
+        grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
         return grad_input, None, None
 
 '''
