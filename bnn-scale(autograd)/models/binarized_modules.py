@@ -120,10 +120,10 @@ class BinarizeConv2d(nn.Conv2d):
 
 
         if input.size(1) != 3:
-            input.data = Binarize(input.data)
+            input.data = Binarize().apply(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        bw=Binarize(self.weight)
+        bw=Binarize().apply(self.weight)
         #print(self.weight.shape)
 
 
