@@ -11,7 +11,7 @@ import numpy as np
 class Binarize(Function):
     @staticmethod
     def forward(ctx, tensor):
-        ctx.save_for_backward(tensor)
+        ctx.tensor = tensor
         #if quant_mode == 'det':
         out =  tensor.sign()
         return out
@@ -20,8 +20,8 @@ class Binarize(Function):
 
     @staticmethod
     def backward(ctx, grad_output):
-        print(ctx)
-        tensor= ctx.saved_tensors
+        #print(ctx)
+        tensor= ctx.tensor
         grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
         return grad_input, None, None
 
