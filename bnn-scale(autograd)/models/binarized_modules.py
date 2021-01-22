@@ -90,10 +90,10 @@ class BinarizeLinear(nn.Linear):
     def forward(self, input):
 
         if input.size(1) != 784:
-            input.data=Binarize(input.data)
+            input.data=Binarize().apply(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=Binarize(self.weight.org)
+        self.weight.data=Binarize().apply(self.weight.org)
         out = nn.functional.linear(input, self.weight)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
