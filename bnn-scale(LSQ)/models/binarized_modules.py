@@ -137,10 +137,10 @@ class BinarizeConv2d(nn.Conv2d):
 
 
         if input.size(1) != 3:
-            input.data = BinarizeLSQ(input.data)
+            input.data = BinarizeLSQ.apply(input.data,self.beta)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=BinarizeLSQ(self.weight.org)
+        self.weight.data=BinarizeLSQ.apply(self.weight.org,self.alpha)
 
         out = nn.functional.conv2d(input, self.weight, None, self.stride,
                                    self.padding, self.dilation, self.groups)
