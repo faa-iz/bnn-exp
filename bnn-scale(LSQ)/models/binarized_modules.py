@@ -16,7 +16,7 @@ def Binarize(tensor,quant_mode='det'):
     else:
         return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
 
-class BinarizeLSQ(Function):
+class BinarizeLSQw(Function):
     @staticmethod
     def forward(self, value, step_size):
         self.save_for_backward(value, step_size)
@@ -48,7 +48,37 @@ class BinarizeLSQ(Function):
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
+class BinarizeLSQi(Function):
+    @staticmethod
+    def forward(self, value, step_size):
+        self.save_for_backward(value, step_size)
+        #self.other = nbits
 
+        #set levels
+        #Qn = -2**(nbits-1)
+        #Qp = 2**(nbits-1) - 1
+
+        v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
+        v_hat = v_bar*step_size
+        return v_hat
+
+    @staticmethod
+    def backward(self, grad_output):
+        value, step_size = self.saved_tensors
+        #nbits = self.other
+
+        #set levels
+        Qn = -1
+        Qp = 1
+        grad_scale = 1.0 / math.sqrt(value.numel() * Qp)
+
+        lower = (value/step_size <= Qn).float()
+        higher = (value/step_size >= Qp).float()
+        middle = (1.0 - higher - lower)
+
+        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size.round())
+
+        return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 class HingeLoss(nn.Module):
     def __init__(self):
@@ -138,10 +168,10 @@ class BinarizeConv2d(nn.Conv2d):
 
 
         if input.size(1) != 3:
-            input.data = BinarizeLSQ.apply(input.data,self.beta)
+            input.data = BinarizeLSQi.apply(input.data,self.beta)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=BinarizeLSQ.apply(self.weight.org,self.alpha)
+        self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
 
         out = nn.functional.conv2d(input, self.weight, None, self.stride,
                                    self.padding, self.dilation, self.groups)
