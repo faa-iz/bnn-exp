@@ -17,7 +17,7 @@ def Binarize(tensor,quant_mode='det'):
 
 class BinarizeLSQ(Function):
     @staticmethod
-    def forward(self, value, step_size, nbits):
+    def forward(self, value, step_size):
         self.save_for_backward(value, step_size)
         #self.other = nbits
 
@@ -26,7 +26,7 @@ class BinarizeLSQ(Function):
         #Qp = 2**(nbits-1) - 1
 
         v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
-        v_hat = v_bar*step_size
+        v_hat = v_bar*step_size.view(v_bar.size(0),1,1,1)
         return v_hat
 
     @staticmethod
@@ -43,7 +43,7 @@ class BinarizeLSQ(Function):
         higher = (value/step_size >= Qp).float()
         middle = (1.0 - higher - lower)
 
-        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + (value/step_size.view(value.size(0),1,1,1)).round())
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
@@ -121,13 +121,26 @@ class BinarizeConv2d(nn.Conv2d):
     def __init__(self, *kargs, **kwargs):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
 
+        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        self.beta = Parameter(torch.ones(self.weight.size(0)))
+        self.register_buffer('init_state', torch.zeros(1))
+
 
     def forward(self, input):
+        if self.init_state == 0:
+            init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
+            init2 =  input.abs().mean()
+            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            self.beta.data.copy_(torch.ones(self.weight.size(0)).cuda() * init2)
+            self.init_state.fill_(1)
+
+
+
         if input.size(1) != 3:
-            input.data = Binarize(input.data)
+            input.data = BinarizeLSQ(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=Binarize(self.weight.org)
+        self.weight.data=BinarizeLSQ(self.weight.org)
 
         out = nn.functional.conv2d(input, self.weight, None, self.stride,
                                    self.padding, self.dilation, self.groups)
