@@ -106,19 +106,21 @@ class BinarizeConv2d(nn.Conv2d):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
-        self.alpha = Parameter(torch.rand(self.weight.size(0)))
+        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        self.beta = Parameter(torch.ones(self.weight.size(0)))
         self.register_buffer('init_state', torch.zeros(1))
 
 
     def forward(self, input):
 
-        '''
+
         if self.init_state == 0:
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init2 =  input.abs().mean()
-            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1*init2)
+            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            self.beta.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             self.init_state.fill_(1)
-        '''
+
 
         if input.size(1) != 3:
             input.data = Binarize().apply(input.data)
@@ -133,7 +135,7 @@ class BinarizeConv2d(nn.Conv2d):
         #print(bw.shape)
         sw = bw
         if input.size(1) != 3:
-            sw = bw*self.alpha.view(bw.size(0),1,1,1)
+            sw = bw*self.alpha.view(bw.size(0),1,1,1)*self.beta.view(bw.size(0),1,1,1)
 
 
         out = nn.functional.conv2d(input, sw, None, self.stride,
