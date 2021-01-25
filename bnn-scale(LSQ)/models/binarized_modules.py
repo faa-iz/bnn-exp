@@ -10,10 +10,42 @@ import numpy as np
 
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
-        return tensor.sign()
+        #return tensor.sign()
+        return (tensor >= 0).type(tensor.type()) - (tensor < 0).type(tensor.type())
     else:
         return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
 
+class BinarizeLSQ(Function):
+    @staticmethod
+    def forward(self, value, step_size, nbits):
+        self.save_for_backward(value, step_size)
+        #self.other = nbits
+
+        #set levels
+        #Qn = -2**(nbits-1)
+        #Qp = 2**(nbits-1) - 1
+
+        v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
+        v_hat = v_bar*step_size
+        return v_hat
+
+    @staticmethod
+    def backward(self, grad_output):
+        value, step_size = self.saved_tensors
+        #nbits = self.other
+
+        #set levels
+        Qn = -1
+        Qp = 1
+        grad_scale = 1.0 / math.sqrt(value.numel() * Qp)
+
+        lower = (value/step_size <= Qn).float()
+        higher = (value/step_size >= Qp).float()
+        middle = (1.0 - higher - lower)
+
+        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+
+        return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 
 
