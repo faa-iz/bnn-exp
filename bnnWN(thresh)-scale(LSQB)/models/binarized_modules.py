@@ -159,7 +159,7 @@ class BinarizeConv2d(nn.Conv2d):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
 
         self.alpha = Parameter(torch.ones(self.weight.size(0)))
-        self.mean = Parameter(torch.ones(self.weight.size(0)))
+        self.mu = Parameter(torch.ones(self.weight.size(0)))
         self.beta = Parameter(torch.ones(1))
         self.register_buffer('init_state', torch.zeros(1))
 
@@ -173,11 +173,11 @@ class BinarizeConv2d(nn.Conv2d):
 
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
 
-            self.mean.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            self.mu.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             self.init_state.fill_(1)
 
         #weight normalization
-        self.weight = self.weight - self.mean.view(self.weight.size(0), 1, 1, 1)
+        self.weight = self.weight - self.mu.view(self.weight.size(0), 1, 1, 1)
         self.weight = self.weight / self.weight.view(self.weight.size(0), -1).std(-1).view(self.weight.size(0), 1, 1, 1)
 
 
