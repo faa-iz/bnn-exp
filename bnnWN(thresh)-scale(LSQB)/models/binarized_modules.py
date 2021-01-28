@@ -19,7 +19,7 @@ def Binarize(tensor,quant_mode='det'):
 
 class normalize(Function):
     def __init__(self,**kwargs):
-        super(normalize,self).__init__(**kwargs)
+        super(normalize,self).__init__()
         self.weight = kwargs['weight']
         self.alpha = Parameter(torch.ones(self.weight.size(0)))
         self.register_buffer('init_state', torch.zeros(1))
