@@ -16,6 +16,27 @@ def Binarize(tensor,quant_mode='det'):
     else:
         return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
 
+
+def normalize(Function, **kwargs):
+    def __init__(self):
+        super(normalize,self).__init__(**kwargs)
+        self.weight = kwargs['weight']
+        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        self.register_buffer('init_state', torch.zeros(1))
+
+    @staticmethod
+    def forward(self, w):
+        if self.init_state == 0:
+            init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
+            #init2 = input.abs().mean()
+            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            #self.beta.data.copy_(torch.ones(1).cuda() * init2)
+            self.init_state.fill_(1)
+        bw = w - self.alpha.view(w.size(0), 1, 1, 1)
+        bw = bw / bw.view(bw.size(0), -1).std(-1).view(bw.size(0), 1, 1, 1)
+        return bw
+
+
 class BinarizeLSQw(Function):
     @staticmethod
     def forward(self, value, step_size):
@@ -25,7 +46,7 @@ class BinarizeLSQw(Function):
         #set levels
         #Qn = -2**(nbits-1)
         #Qp = 2**(nbits-1) - 1
-
+        value = normalize(weight=value).apply(value)
         v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
         v_hat = v_bar*step_size.view(v_bar.size(0),1,1,1)
         return v_hat
