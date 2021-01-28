@@ -22,7 +22,7 @@ class normalize(Function):
         super(normalize,self).__init__()
         self.weight = kwargs['weight']
         self.alpha = Parameter(torch.ones(self.weight.size(0)))
-        self.register_buffer('init_state', torch.zeros(1))
+        self.init_state = 0
 
     @staticmethod
     def forward(self, w):
@@ -31,7 +31,7 @@ class normalize(Function):
             #init2 = input.abs().mean()
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             #self.beta.data.copy_(torch.ones(1).cuda() * init2)
-            self.init_state.fill_(1)
+            self.init_state=1
         bw = w - self.alpha.view(w.size(0), 1, 1, 1)
         bw = bw / bw.view(bw.size(0), -1).std(-1).view(bw.size(0), 1, 1, 1)
         return bw
