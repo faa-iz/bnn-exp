@@ -177,8 +177,8 @@ class BinarizeConv2d(nn.Conv2d):
             self.init_state.fill_(1)
 
         #weight normalization
-        self.weight = self.weight - self.mu.view(self.weight.size(0), 1, 1, 1)
-        self.weight = self.weight / self.weight.view(self.weight.size(0), -1).std(-1).view(self.weight.size(0), 1, 1, 1)
+        self.weight.data = self.weight.data - self.mu.view(self.weight.size(0), 1, 1, 1)
+        self.weight.data = self.weight.data / self.weight.data.view(self.weight.size(0), -1).std(-1).view(self.weight.size(0), 1, 1, 1)
 
 
         if input.size(1) != 3:
