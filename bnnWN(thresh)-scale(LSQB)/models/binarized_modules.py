@@ -17,24 +17,7 @@ def Binarize(tensor,quant_mode='det'):
         return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
 
 
-class normalize(Function):
-    def __init__(self,**kwargs):
-        super(normalize,self).__init__()
-        self.weight = kwargs['weight']
-        self.alpha = Parameter(torch.ones(self.weight.size(0)))
-        self.init_state = 0
 
-    @staticmethod
-    def forward(self, w):
-        if self.init_state == 0:
-            init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
-            #init2 = input.abs().mean()
-            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
-            #self.beta.data.copy_(torch.ones(1).cuda() * init2)
-            self.init_state=1
-        bw = w - self.alpha.view(w.size(0), 1, 1, 1)
-        bw = bw / bw.view(bw.size(0), -1).std(-1).view(bw.size(0), 1, 1, 1)
-        return bw
 
 
 class BinarizeLSQw(Function):
@@ -46,7 +29,7 @@ class BinarizeLSQw(Function):
         #set levels
         #Qn = -2**(nbits-1)
         #Qp = 2**(nbits-1) - 1
-        value = normalize(weight=value).apply(value)
+
         v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
         v_hat = v_bar*step_size.view(v_bar.size(0),1,1,1)
         return v_hat
@@ -176,6 +159,7 @@ class BinarizeConv2d(nn.Conv2d):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
 
         self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        self.mean = Parameter(torch.ones(self.weight.size(0)))
         self.beta = Parameter(torch.ones(1))
         self.register_buffer('init_state', torch.zeros(1))
 
@@ -184,14 +168,22 @@ class BinarizeConv2d(nn.Conv2d):
         if self.init_state == 0:
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init2 =  input.abs().mean()
+            init3 = self.weight.view(self.weight.size(0), -1).mean(-1)
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
+
+            self.mean.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             self.init_state.fill_(1)
 
+        #weight normalization
+        self.weight = self.weight - self.mean.view(self.weight.size(0), 1, 1, 1)
+        self.weight = self.weight / self.weight.view(self.weight.size(0), -1).std(-1).view(self.weight.size(0), 1, 1, 1)
 
 
         if input.size(1) != 3:
             input.data = BinarizeLSQi.apply(input.data,self.beta)
+
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
