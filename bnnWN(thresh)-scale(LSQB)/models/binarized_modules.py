@@ -170,16 +170,19 @@ class BinarizeConv2d(nn.Conv2d):
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init2 =  input.abs().mean()
             init3 = self.weight.view(self.weight.size(0), -1).mean(-1)
+            init4 = self.weight.view(self.weight.size(0), -1).std(-1)
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
 
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
 
             self.mu.data.copy_(torch.ones(self.weight.size(0)).cuda() * init3)
+            self.sig.data.copy_(torch.ones(self.weight.size(0)).cuda() * init4)
             self.init_state.fill_(1)
 
         #weight normalization
         self.weight.data = self.weight.data - self.mu.view(self.weight.size(0), 1, 1, 1)
-        self.weight.data = self.weight.data / self.weight.data.view(self.weight.size(0), -1).std(-1).view(self.weight.size(0), 1, 1, 1)
+        self.weight.data = self.weight.data / self.sig.view(self.weight.size(0), 1, 1, 1)
+        #self.weight.data = self.weight.data / self.weight.data.view(self.weight.size(0), -1).std(-1).view(self.weight.size(0), 1, 1, 1)
 
 
         if input.size(1) != 3:
