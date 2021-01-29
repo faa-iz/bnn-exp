@@ -68,7 +68,7 @@ class BinarizeLSQi(Function):
         #Qp = 2**(nbits-1) - 1
 
         #v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
-        v_bar = value.add_(1).div_(2).add_(torch.rand(tensor.size()).cuda().add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
+        v_bar = value.add_(1).div_(2).add_(torch.rand(value.size()).cuda().add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
         v_hat = v_bar*step_size
         return v_hat
 
