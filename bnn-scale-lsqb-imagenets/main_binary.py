@@ -97,15 +97,16 @@ def main():
     '''
     # create model
     logging.info("creating model %s", args.model)
-    #model = models.__dict__[args.model]
-    model = torch.nn.DataParallel(models.__dict__[args.model])
-    model.cuda()
+    model = models.__dict__[args.model]
+    #model = torch.nn.DataParallel(models.__dict__[args.model])
+    #model.cuda()
     model_config = {'input_size': args.input_size, 'dataset': args.dataset}
 
     if args.model_config is not '':
         model_config = dict(model_config, **literal_eval(args.model_config))
 
-    model = model(**model_config)
+    model = torch.nn.DataParallel(model(**model_config))
+    model.cuda()
     logging.info("created model with configuration: %s", model_config)
 
     # optionally resume from a checkpoint
