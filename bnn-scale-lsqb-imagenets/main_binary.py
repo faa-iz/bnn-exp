@@ -105,7 +105,8 @@ def main():
     if args.model_config is not '':
         model_config = dict(model_config, **literal_eval(args.model_config))
 
-    model = torch.nn.DataParallel(model(**model_config))
+    model = model(**model_config)
+    model = torch.nn.DataParallel(model)
     model.cuda()
     logging.info("created model with configuration: %s", model_config)
 
@@ -165,11 +166,11 @@ def main():
         return
 
     train_data = get_dataset(args.dataset, 'train', transform['train'])
-    train_sampler = torch.utils.data.distributed.DistributedSampler(train_data)
+    #train_sampler = torch.utils.data.distributed.DistributedSampler(train_data)
     train_loader = torch.utils.data.DataLoader(
         train_data,
-        batch_size=args.batch_size, shuffle=False,
-        num_workers=args.workers, pin_memory=True,sampler=train_sampler )
+        batch_size=args.batch_size, shuffle=True,
+        num_workers=args.workers, pin_memory=True )
 
 
     #optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
