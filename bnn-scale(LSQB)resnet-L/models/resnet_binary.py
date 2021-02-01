@@ -195,7 +195,7 @@ class ResNet_cifar10(ResNet):
         self.avgpool = nn.AvgPool2d(4)
         self.fc  = nn.Linear(512 * block.expansion, num_classes)
         self.bn2 = nn.BatchNorm1d(512 * block.expansion)
-        self.softmax = nn.LogSoftmax()
+        self.logsoftmax = nn.LogSoftmax()
 
         init_model(self)
         #self.regime = {
