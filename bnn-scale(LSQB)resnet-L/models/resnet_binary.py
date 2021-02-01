@@ -131,7 +131,7 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        x = self.maxpool(x)
+        #x = self.maxpool(x)
         x = self.bn1(x)
         x = self.tanh1(x)
         x = self.layer1(x)
