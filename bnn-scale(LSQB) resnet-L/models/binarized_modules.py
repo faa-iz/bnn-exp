@@ -44,11 +44,11 @@ class BinarizeLSQw(Function):
         higher = (value/step_size >= Qp).float()
         middle = (1.0 - higher - lower)
 
-        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + (value/step_size.view(value.size(0),1,1,1)).round())
-        #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil()))
+        #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + (value/step_size.view(value.size(0),1,1,1)).round())
+        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil()))
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
-    
+
 class BinarizeLSQi(Function):
     @staticmethod
     def forward(self, value, step_size):
@@ -70,15 +70,15 @@ class BinarizeLSQi(Function):
 
         #set levels
         Qn = -1
-        Qp = 1lsq
+        Qp = 1
         grad_scale = 1.0 / math.sqrt(value.numel() * Qp)
 
         lower = (value/step_size <= Qn).float()
         higher = (value/step_size >= Qp).float()
         middle = (1.0 - higher - lower)
 
-        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
-        #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + value.sign()*((value/step_size).abs().ceil()))
+        #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + value.sign()*((value/step_size).abs().ceil()))
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
