@@ -184,7 +184,7 @@ class ResNet_cifar10(ResNet):
                  block=BasicBlock, depth=18):
         super(ResNet_cifar10, self).__init__()
 
-        self.in_planes = 64
+        self.inplanes = 64
 
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
