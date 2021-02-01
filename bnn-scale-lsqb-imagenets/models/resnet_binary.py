@@ -154,10 +154,11 @@ class ResNet(nn.Module):
 class ResNet_imagenet(ResNet):
 
     def __init__(self, num_classes=1000,
-                 block=Bottleneck, layers=[3, 4, 23, 3]):
+                 block=BasicBlock, layers=[3, 4, 23, 3]):
         super(ResNet_imagenet, self).__init__()
 
         self.inplanes = 64
+
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.tanh1 = nn.Hardtanh(inplace=True)
