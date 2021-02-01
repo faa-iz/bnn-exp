@@ -84,7 +84,7 @@ class BinarizeLSQi(Function):
 
 class LSQbw(Function):
     @staticmethod
-    def forward(self, value, step_size, nbits):
+    def forward(self, value, step_size, nbits=8):
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -118,7 +118,7 @@ class LSQbw(Function):
 
 class LSQbi(Function):
     @staticmethod
-    def forward(self, value, step_size, nbits):
+    def forward(self, value, step_size, nbits=8):
         self.save_for_backward(value, step_size)
         self.other = nbits
 
