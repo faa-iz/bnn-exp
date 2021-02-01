@@ -156,14 +156,16 @@ class ResNet_imagenet(ResNet):
     def __init__(self, num_classes=1000,
                  block=Bottleneck, layers=[3, 4, 23, 3]):
         super(ResNet_imagenet, self).__init__()
+
+        self.inplanes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.tanh1 = nn.Hardtanh(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
-        self.layer1 = self._make_layer(block, 64, layers[0])
-        self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
-        self.layer3 = self._make_layer(block, 256, layers[2], stride=2)
-        self.layer4 = self._make_layer(block, 512, layers[3], stride=2)
+        self.layer1 = self._make_layer(block, 64, 2)
+        self.layer2 = self._make_layer(block, 128, 2, stride=2)
+        self.layer3 = self._make_layer(block, 256, 2, stride=2)
+        self.layer4 = self._make_layer(block, 512, 2, stride=2)
         self.avgpool = nn.AvgPool2d(7, stride=1)
         self.bn2 = nn.BatchNorm1d(512 * block.expansion)
         self.tanh2 = nn.Hardtanh(inplace=True)
