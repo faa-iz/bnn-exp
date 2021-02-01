@@ -193,7 +193,7 @@ class ResNet_cifar10(ResNet):
         self.layer3 = self._make_layer(block, 256, 2, stride=2)
         self.layer4 = self._make_layer(block, 512, 2, stride=2)
         self.avgpool = nn.AvgPool2d(4)
-        self.linear = nn.Linear(512 * block.expansion, num_classes)
+        self.fc  = nn.Linear(512 * block.expansion, num_classes)
         self.bn2 = nn.BatchNorm1d(512 * block.expansion)
         self.softmax = nn.LogSoftmax()
 
