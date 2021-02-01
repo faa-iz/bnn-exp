@@ -131,9 +131,9 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         x = self.conv1(x)
-        #x = self.maxpool(x)
+        x = self.maxpool(x)
         x = self.bn1(x)
-        #x = self.tanh1(x)
+        x = self.tanh1(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -142,9 +142,9 @@ class ResNet(nn.Module):
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
         x = self.bn2(x)
-        #x = self.tanh2(x)
+        x = self.tanh2(x)
         x = self.fc(x)
-        #x = self.bn3(x)
+        x = self.bn3(x)
         x = self.logsoftmax(x)
 
         return x
@@ -186,16 +186,20 @@ class ResNet_cifar10(ResNet):
 
         self.inplanes = 64
 
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
-        self.layer1 = self._make_layer(block,  64, 2, stride=1)
+        self.tanh1 = nn.Hardtanh(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+        self.layer1 = self._make_layer(block, 64, 2)
         self.layer2 = self._make_layer(block, 128, 2, stride=2)
         self.layer3 = self._make_layer(block, 256, 2, stride=2)
         self.layer4 = self._make_layer(block, 512, 2, stride=2)
-        self.avgpool = nn.AvgPool2d(4)
-        self.fc  = nn.Linear(512 * block.expansion, num_classes)
+        self.avgpool = nn.AvgPool2d(7, stride=1)
         self.bn2 = nn.BatchNorm1d(512 * block.expansion)
-        self.logsoftmax = nn.LogSoftmax()
+        self.tanh2 = nn.Hardtanh(inplace=True)
+        self.fc = nn.Linear(512 * block.expansion, num_classes)
+        self.bn3 = nn.BatchNorm1d(num_classes)
+        self.logsoftmax = nn.LogSoftmax(dim=1)
 
         init_model(self)
         #self.regime = {
