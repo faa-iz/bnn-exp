@@ -84,7 +84,7 @@ class BinarizeLSQi(Function):
 
 class LSQbw(Function):
     @staticmethod
-    def forward(self, value, step_size, nbits=8):
+    def forward(self, value, step_size, nbits):
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -118,7 +118,7 @@ class LSQbw(Function):
 
 class LSQbi(Function):
     @staticmethod
-    def forward(self, value, step_size, nbits=8):
+    def forward(self, value, step_size, nbits):
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -242,11 +242,11 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input.data = BinarizeLSQi.apply(input.data,self.beta)
-            input.data = LSQbi.apply(input.data,self.beta,nbits=8)
+            input.data = LSQbi.apply(input.data,self.beta,8)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
-        self.weight.data=LSQbw.apply(self.weight.org,self.alpha,nbits=8)
+        self.weight.data=LSQbw.apply(self.weight.org,self.alpha,8)
 
         out = nn.functional.conv2d(input, self.weight, None, self.stride,
                                    self.padding, self.dilation, self.groups)
