@@ -224,7 +224,7 @@ class BinarizeLinear(nn.Linear):
             #input.data=LSQbi.apply(input.data,self.beta, nbits)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=BinarizeLSQi.apply(self.weight.data,self.alpha)
+        self.weight.data=BinarizeLSQi.apply(self.weight.org,self.alpha)
         #self.weight.data=LSQbi.apply(self.weight.org,self.alpha,nbits)
         out = nn.functional.linear(input, self.weight)
         if not self.bias is None:
