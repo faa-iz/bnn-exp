@@ -198,7 +198,7 @@ def Quantize(tensor,quant_mode='det',  params=None, numBits=8):
 #import torch.nn._functions as tnnf
 
 
-class BinarizeLinear1(nn.Linear):
+class BinarizeLinear(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
@@ -224,7 +224,7 @@ class BinarizeLinear1(nn.Linear):
             #input.data=LSQbi.apply(input.data,self.beta, nbits)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=BinarizeLSQi.apply(input.data,self.alpha)
+        self.weight.data=BinarizeLSQi.apply(self.weight.data,self.alpha)
         #self.weight.data=LSQbi.apply(self.weight.org,self.alpha,nbits)
         out = nn.functional.linear(input, self.weight)
         if not self.bias is None:
@@ -233,7 +233,7 @@ class BinarizeLinear1(nn.Linear):
 
         return out
 
-class BinarizeLinear(nn.Linear):
+class BinarizeLinear1(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
