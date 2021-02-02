@@ -29,7 +29,7 @@ class BasicBlock(nn.Module):
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm2d(planes)
         self.relu1 = nn.PReLU(inplace=True)
-        self.conv2 = conv3x3(planes, planes) \
+        self.conv2 = conv3x3(planes, planes)
         self.relu2 = nn.PReLU(inplace=True)
         self.bn2 = nn.BatchNorm2d(planes)
         self.downsample = downsample
