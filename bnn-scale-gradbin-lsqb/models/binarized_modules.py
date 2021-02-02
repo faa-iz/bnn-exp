@@ -8,7 +8,7 @@ from torch.nn.parameter import Parameter
 
 import numpy as np
 
-
+nbits = 4
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
         #return tensor.sign()
@@ -202,14 +202,28 @@ class BinarizeLinear(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
+        self.alpha = Parameter(torch.ones(1))
+        self.beta = Parameter(torch.ones(1))
 
     def forward(self, input):
+        if self.init_state == 0:
+            init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
+            init1_ = self.weight.abs().mean()
+            init2 =  input.abs().mean()
+            self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
+            self.beta.data.copy_(torch.ones(1).cuda() * init2)
+            #self.step_size.data.copy_(torch.ones(1).cuda() * init1_ * init2)
+            self.init_state.fill_(1)
+
+
 
         if input.size(1) != 784:
-            input.data=Binarize(input.data)
+            #input.data=Binarize(input.data)
+            input.data=LSQbi.apply(input.data,self.beta, nbits)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=Binarize(self.weight.org)
+        #self.weight.data=Binarize(self.weight.org)
+        self.weight.data=LSQbw.apply(self.weight.org,self.alpha,nbits)
         out = nn.functional.linear(input, self.weight)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
@@ -237,8 +251,6 @@ class BinarizeConv2d(nn.Conv2d):
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
             #self.step_size.data.copy_(torch.ones(1).cuda() * init1_ * init2)
             self.init_state.fill_(1)
-
-        nbits = 4
 
         if input.size(1) != 3:
             #input.data = BinarizeLSQi.apply(input.data,self.beta)
