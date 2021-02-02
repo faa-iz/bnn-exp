@@ -198,7 +198,7 @@ def Quantize(tensor,quant_mode='det',  params=None, numBits=8):
 #import torch.nn._functions as tnnf
 
 
-class BinarizeLinear(nn.Linear):
+class BinarizeLinear1(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
@@ -233,7 +233,7 @@ class BinarizeLinear(nn.Linear):
 
         return out
 
-class BinarizeLinear1(nn.Linear):
+class BinarizeLinear(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
