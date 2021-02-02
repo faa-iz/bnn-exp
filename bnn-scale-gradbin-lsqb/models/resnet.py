@@ -28,9 +28,9 @@ class BasicBlock(nn.Module):
         super(BasicBlock, self).__init__()
         self.conv1 = conv3x3(inplanes, planes, stride)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.relu1 = nn.PReLU(inplace=True)
+        self.relu1 = nn.PReLU()#inplace=True)
         self.conv2 = conv3x3(planes, planes)
-        self.relu2 = nn.PReLU(inplace=True)
+        self.relu2 = nn.PReLU()#inplace=True)
         self.bn2 = nn.BatchNorm2d(planes)
         self.downsample = downsample
         self.stride = stride
@@ -147,7 +147,7 @@ class ResNet_imagenet(ResNet):
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
                                bias=False)
         self.bn1 = nn.BatchNorm2d(64)
-        self.relu = nn.PReLU(inplace=True)
+        self.relu = nn.PReLU()#inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2)
