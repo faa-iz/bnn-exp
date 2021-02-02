@@ -204,6 +204,7 @@ class BinarizeLinear(nn.Linear):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
         self.alpha = Parameter(torch.ones(1))
         self.beta = Parameter(torch.ones(1))
+        self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, input):
         if self.init_state == 0:
