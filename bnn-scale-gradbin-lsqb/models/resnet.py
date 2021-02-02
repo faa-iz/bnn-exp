@@ -1,12 +1,13 @@
 import torch.nn as nn
 import torchvision.transforms as transforms
 import math
+from .binarized_modules import  BinarizeLinear,BinarizeConv2d
 
 __all__ = ['resnet']
 
 def conv3x3(in_planes, out_planes, stride=1):
     "3x3 convolution with padding"
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
+    return BinarizeConv2d(in_planes, out_planes, kernel_size=3, stride=stride,
                      padding=1, bias=False)
 
 
@@ -164,19 +165,27 @@ class ResNet_cifar10(ResNet):
     def __init__(self, num_classes=10,
                  block=BasicBlock, depth=18):
         super(ResNet_cifar10, self).__init__()
-        self.inplanes = 16
+        self.inflate = 5
+        self.inplanes = 16 * self.inflate
+
+
         n = int((depth - 2) / 6)
-        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1,
-                               bias=False)
-        self.bn1 = nn.BatchNorm2d(16)
-        self.relu = nn.ReLU(inplace=True)
+        self.conv1 = BinarizeConv2d(3, 16 * self.inflate, kernel_size=3, stride=1, padding=1,
+                                    bias=False)
         self.maxpool = lambda x: x
-        self.layer1 = self._make_layer(block, 16, n)
-        self.layer2 = self._make_layer(block, 32, n, stride=2)
-        self.layer3 = self._make_layer(block, 64, n, stride=2)
+        self.bn1 = nn.BatchNorm2d(16 * self.inflate)
+        self.tanh1 = nn.Hardtanh(inplace=True)
+        self.tanh2 = nn.Hardtanh(inplace=True)
+        self.relu = nn.ReLU(inplace=True)
+        self.layer1 = self._make_layer(block, 16 * self.inflate, n)
+        self.layer2 = self._make_layer(block, 32 * self.inflate, n, stride=2)
+        self.layer3 = self._make_layer(block, 64 * self.inflate, n, stride=2, do_bntan=False)
         self.layer4 = lambda x: x
         self.avgpool = nn.AvgPool2d(8)
-        self.fc = nn.Linear(64, num_classes)
+        self.bn2 = nn.BatchNorm1d(64 * self.inflate)
+        self.bn3 = nn.BatchNorm1d(10)
+        self.logsoftmax = nn.LogSoftmax()
+        self.fc = BinarizeLinear(64 * self.inflate, num_classes)
 
         init_model(self)
         self.regime = {
