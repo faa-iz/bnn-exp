@@ -179,7 +179,7 @@ class ResNet_cifar10(ResNet):
         self.relu = nn.ReLU(inplace=True)
         self.layer1 = self._make_layer(block, 16 * self.inflate, n)
         self.layer2 = self._make_layer(block, 32 * self.inflate, n, stride=2)
-        self.layer3 = self._make_layer(block, 64 * self.inflate, n, stride=2, do_bntan=False)
+        self.layer3 = self._make_layer(block, 64 * self.inflate, n, stride=2)#, do_bntan=False)
         self.layer4 = lambda x: x
         self.avgpool = nn.AvgPool2d(8)
         self.bn2 = nn.BatchNorm1d(64 * self.inflate)
