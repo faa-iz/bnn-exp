@@ -4,8 +4,8 @@ import torchvision.transforms as transforms
 from torch.autograd import Function
 from .binarized_modules import  BinarizeLinear,BinarizeConv2d
 
-htan = nn.Identity()
-#htan = nn.Hardtanh(inplace=True)
+#htan = nn.Identity()
+htan = nn.Hardtanh(inplace=True)
 
 class VGG_Cifar10(nn.Module):
 
