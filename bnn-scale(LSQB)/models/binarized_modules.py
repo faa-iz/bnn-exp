@@ -79,6 +79,7 @@ class BinarizeLSQi(Function):
 
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + value.sign()*((value/step_size).abs().ceil()))
+        print("grad step_size: "+ str(grad_step_size))
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
