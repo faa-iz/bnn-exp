@@ -19,6 +19,7 @@ def Binarize(tensor,quant_mode='det'):
 class BinarizeLSQw(Function):
     @staticmethod
     def forward(self, value, step_size):
+        print("forward")
         self.save_for_backward(value, step_size)
         #self.other = nbits
 
@@ -32,7 +33,7 @@ class BinarizeLSQw(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print("testing if called")
+        print("backward")
         value, step_size = self.saved_tensors
         #nbits = self.other
 
