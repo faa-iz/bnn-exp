@@ -20,6 +20,7 @@ class BinarizeLSQw(Function):
     @staticmethod
     def forward(self, value, step_size):
         self.save_for_backward(value, step_size)
+
         #self.other = nbits
 
         #set levels
@@ -51,7 +52,9 @@ class BinarizeLSQw(Function):
     
 class BinarizeLSQi(Function):
     @staticmethod
+
     def forward(self, value, step_size):
+        self.markdirty(value)
         self.save_for_backward(value, step_size)
         print("forward")
         #self.other = nbits
@@ -62,7 +65,7 @@ class BinarizeLSQi(Function):
 
         v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
         v_hat = v_bar*step_size
-        return v_hat
+        return v_hat.clone()
 
     @staticmethod
     def backward(self, grad_output):
