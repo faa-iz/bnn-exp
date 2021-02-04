@@ -118,7 +118,7 @@ class LSQbw(Function):
         print(grad_output.shape)
         print(grad_step_size.shape)
         #return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).sum().unsqueeze(dim=0), None
-        return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).sum(-1), None
+        return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).view(grad_output.size(0),-1).sum(-1), None
 
 class LSQbi(Function):
     @staticmethod
