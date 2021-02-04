@@ -169,8 +169,8 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     logging.info('training regime: %s', regime)
 
-    #for n,p in model.named_parameters():
-    #        print(n)
+    for key in model.state_dict():
+            print(key)
     for epoch in range(args.start_epoch, args.epochs):
         optimizer = adjust_optimizer(optimizer, epoch, regime)
 
