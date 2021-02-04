@@ -60,8 +60,6 @@ class BinarizeLSQi(Function):
 
         self.save_for_backward(value, step_size)
         print("forward")
-        self.mark_dirty(value)
-        self.mark_dirty(step_size)
         #self.other = nbits
 
         #set levels
@@ -74,9 +72,10 @@ class BinarizeLSQi(Function):
 
     @staticmethod
     def backward(self, grad_output):
+        print("backward")
+
         value, step_size = self.saved_tensors
         #nbits = self.other
-        print("backward")
 
         #set levels
         Qn = -1
