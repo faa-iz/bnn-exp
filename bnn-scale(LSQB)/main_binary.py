@@ -169,8 +169,8 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     logging.info('training regime: %s', regime)
 
-    for key in model.state_dict():
-            print(key)
+    #for key in model.state_dict():
+    #        print(key)
 
     for epoch in range(args.start_epoch, args.epochs):
         optimizer = adjust_optimizer(optimizer, epoch, regime)
@@ -286,7 +286,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                              phase='TRAINING' if training else 'EVALUATING',
                              batch_time=batch_time,
                              data_time=data_time, loss=losses, top1=top1, top5=top5))
-            print(model.state_dict()['features.1.beta'])
+            print(model.state_dict()['features.3.beta'])
 
     return losses.avg, top1.avg, top5.avg
 
