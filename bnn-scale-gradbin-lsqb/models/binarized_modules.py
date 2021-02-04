@@ -85,6 +85,7 @@ class BinarizeLSQi(Function):
 class LSQbw(Function):
     @staticmethod
     def forward(self, value, step_size, nbits):
+        print('forward')
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -99,6 +100,7 @@ class LSQbw(Function):
 
     @staticmethod
     def backward(self, grad_output):
+        print('backward')
         value, step_size = self.saved_tensors
         nbits = self.other
 
@@ -119,6 +121,7 @@ class LSQbw(Function):
 class LSQbi(Function):
     @staticmethod
     def forward(self, value, step_size, nbits):
+        print('forward2')
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -133,6 +136,7 @@ class LSQbi(Function):
 
     @staticmethod
     def backward(self, grad_output):
+        print('backward2')
         value, step_size = self.saved_tensors
         nbits = self.other
 
@@ -221,12 +225,12 @@ class BinarizeLinear(nn.Linear):
 
         if input.size(1) != 784:
             #input.data=BinarizeLSQi.apply(input.data,self.beta)
-            input.data=LSQbi.apply(input.data,self.beta, nbits)
+            input=LSQbi.apply(input,self.beta, nbits)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQi.apply(self.weight.org,self.alpha)
-        self.weight.data=LSQbi.apply(self.weight.org,self.alpha,nbits)
-        out = nn.functional.linear(input, self.weight)
+        w_q =LSQbi.apply(self.weight,self.alpha,nbits)
+        out = nn.functional.linear(input, w_q)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
             out += self.bias.view(1, -1).expand_as(out)
@@ -246,7 +250,7 @@ class BinarizeLinear1(nn.Linear):
         self.weight.data=Binarize(self.weight.org)
         out = nn.functional.linear(input, self.weight)
         if not self.bias is None:
-            print("aaaaaa")
+            #print("aaaaaa")
             self.bias.org=self.bias.data.clone()
             out += self.bias.view(1, -1).expand_as(out)
 
@@ -275,13 +279,13 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input.data = BinarizeLSQi.apply(input.data,self.beta)
-            input.data = LSQbi.apply(input.data,self.beta, nbits)
+            input = LSQbi.apply(input,self.beta, nbits)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
-        self.weight.data=LSQbw.apply(self.weight.org,self.alpha,nbits)
+        w_q =LSQbw.apply(self.weight,self.alpha,nbits)
 
-        out = nn.functional.conv2d(input, self.weight, None, self.stride,
+        out = nn.functional.conv2d(input, w_q, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
         if not self.bias is None:
