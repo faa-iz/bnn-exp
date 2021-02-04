@@ -20,13 +20,14 @@ class BinarizeLSQw(Function):
     @staticmethod
     def forward(self, value, step_size):
         print("forward")
-        self.save_for_backward(value, step_size)
+        step_size_b = step_size.clone()
+        self.save_for_backward(value, step_size_b)
         #self.other = nbits
 
         #set levels
         #Qn = -2**(nbits-1)
         #Qp = 2**(nbits-1) - 1
-        step_size =  step_size.clone()
+
 
 
         v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
