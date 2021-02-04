@@ -111,8 +111,7 @@ class Conv2dLSQ(nn.Conv2d):
                  padding=0, dilation=1, groups=1, bias=True, nbits=3):
         super(Conv2dLSQ, self).__init__(
             in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size,
-            stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias,
-            nbits=nbits)
+            stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias)
         #self.nbits = kwargs['nbits']
         self.step_size = Parameter(torch.Tensor(1))
 
