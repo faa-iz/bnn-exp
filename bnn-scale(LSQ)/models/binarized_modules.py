@@ -54,7 +54,7 @@ class BinarizeLSQi(Function):
     @staticmethod
 
     def forward(self, value, step_size):
-        self.markdirty(value)
+        self.mark_dirty(value)
         self.save_for_backward(value, step_size)
         print("forward")
         #self.other = nbits
