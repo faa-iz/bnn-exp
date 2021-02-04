@@ -54,9 +54,6 @@ class BinarizeLSQw(Function):
     
 class BinarizeLSQi(Function):
     @staticmethod
-    def __init__(self):
-        super(BinarizeLSQi,self).__init__()
-
     def forward(self, value, step_size):
 
         self.save_for_backward(value, step_size)

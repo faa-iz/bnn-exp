@@ -106,25 +106,22 @@ class _ActQ(nn.Module):
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
 
-class Conv2dLSQ(nn.Conv2d):
+class Conv2dLSQ(_Conv2dQ):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True, nbits=3):
         super(Conv2dLSQ, self).__init__(
             in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size,
-            stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias)
-        #self.nbits = kwargs['nbits']
-        self.step_size = Parameter(torch.Tensor(1))
+            stride=stride, padding=padding, dilation=dilation, groups=groups, bias=bias,
+            nbits=nbits)
 
-        # buffer is not updated for optim.step
-        self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, x):
         if self.init_state == 0:
-            self.step_size.data.copy_(2 * self.weight.abs().mean() / math.sqrt(2 ** (2 - 1) - 1))
+            self.step_size.data.copy_(2 * self.weight.abs().mean() / math.sqrt(2 ** (self.nbits - 1) - 1))
             self.init_state.fill_(1)
 
         #w_q = quantizeLSQ(self.weight, self.step_size, self.nbits)
-        w_q = LSQ.apply(self.weight, self.step_size, 2, True)
+        w_q = LSQ.apply(self.weight, self.step_size, self.nbits, True)
 
         return F.conv2d(x, w_q, self.bias, self.stride,
                         self.padding, self.dilation, self.groups)
