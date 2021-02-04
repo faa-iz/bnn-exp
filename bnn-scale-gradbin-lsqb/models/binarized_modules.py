@@ -271,6 +271,7 @@ class BinarizeConv2d(nn.Conv2d):
 
     def forward(self, input):
         if self.init_state == 0:
+            print(self.weight.shape)
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
