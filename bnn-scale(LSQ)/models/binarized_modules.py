@@ -70,7 +70,7 @@ class BinarizeLSQi(Function):
 
         #set levels
         Qn = -1
-        Qp = 1lsq
+        Qp = 1
         grad_scale = 1.0 / math.sqrt(value.numel() * Qp)
 
         lower = (value/step_size <= Qn).float()
