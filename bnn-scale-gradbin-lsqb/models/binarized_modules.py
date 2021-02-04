@@ -8,7 +8,7 @@ from torch.nn.parameter import Parameter
 
 import numpy as np
 
-nbits = 1
+nbits = 8
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
         #return tensor.sign()
