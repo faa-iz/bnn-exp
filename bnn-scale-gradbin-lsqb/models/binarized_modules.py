@@ -85,7 +85,7 @@ class BinarizeLSQi(Function):
 class LSQbw(Function):
     @staticmethod
     def forward(self, value, step_size, nbits):
-        print('forward')
+        #print('forward')
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -100,7 +100,7 @@ class LSQbw(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print('backward')
+        #print('backward')
         value, step_size = self.saved_tensors
         nbits = self.other
 
@@ -115,15 +115,15 @@ class LSQbw(Function):
 
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil()))
-        print(grad_output.shape)
-        print(grad_step_size.shape)
+        #print(grad_output.shape)
+        #print(grad_step_size.shape)
         #return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).sum().unsqueeze(dim=0), None
         return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).view(grad_output.size(0),-1).sum(-1), None
 
 class LSQbi(Function):
     @staticmethod
     def forward(self, value, step_size, nbits):
-        print('forward2')
+        #print('forward2')
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -138,7 +138,7 @@ class LSQbi(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print('backward2')
+        #print('backward2')
         value, step_size = self.saved_tensors
         nbits = self.other
 
