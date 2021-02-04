@@ -106,7 +106,7 @@ class _ActQ(nn.Module):
         #buffer is not updated for optim.step
         self.register_buffer('init_state', torch.zeros(1))
 
-class Conv2dLSQ(_Conv2dQ):
+class Conv2dLSQ(nn.Conv2d):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1,
                  padding=0, dilation=1, groups=1, bias=True, nbits=3):
         super(Conv2dLSQ, self).__init__(
