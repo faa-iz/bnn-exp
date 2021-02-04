@@ -117,7 +117,8 @@ class LSQbw(Function):
         grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil()))
         print(grad_output.shape)
         print(grad_step_size.shape)
-        return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).sum().unsqueeze(dim=0), None
+        #return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).sum().unsqueeze(dim=0), None
+        return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).sum(-1), None
 
 class LSQbi(Function):
     @staticmethod
@@ -153,7 +154,7 @@ class LSQbi(Function):
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + value.sign()*((value/step_size).abs().ceil()))
 
-        return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum(-1), None
+        return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 class HingeLoss(nn.Module):
     def __init__(self):
