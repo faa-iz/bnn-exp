@@ -51,7 +51,52 @@ class BinarizeLSQw(Function):
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil()))
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
-    
+
+class BinarizeLSQi(Function):
+    @staticmethod
+    def forward(self, value, step_size):
+        nbits = 3
+        signed = True
+        print('forward')
+        self.save_for_backward(value, step_size)
+        self.other = nbits, signed
+
+        #set levels
+        if signed:
+            Qn = -2**(nbits-1)
+            Qp = 2**(nbits-1) - 1
+        else:
+            Qn = 0
+            Qp = 2**nbits - 1
+
+        v_bar = (value/step_size).round().clamp(Qn, Qp)
+        v_hat = v_bar*step_size
+        return v_hat
+
+    @staticmethod
+    def backward(self, grad_output):
+        print('backward')
+        value, step_size = self.saved_tensors
+        nbits, signed = self.other
+
+        #set levels
+        if signed:
+            Qn = -2**(nbits-1)
+            Qp = 2**(nbits-1) - 1
+        else:
+            Qn = 0
+            Qp = 2**nbits - 1
+
+        grad_scale = 1.0 / math.sqrt(value.numel() * Qp)
+
+        lower = (value/step_size <= Qn).float()
+        higher = (value/step_size >= Qp).float()
+        middle = (1.0 - higher - lower)
+
+        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+
+        return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None, None
+'''
 class BinarizeLSQi(Function):
     @staticmethod
     def forward(self, value, step_size):
@@ -88,7 +133,7 @@ class BinarizeLSQi(Function):
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + value.sign()*((value/step_size).abs().ceil()))
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
-
+'''
 class HingeLoss(nn.Module):
     def __init__(self):
         super(HingeLoss,self).__init__()
