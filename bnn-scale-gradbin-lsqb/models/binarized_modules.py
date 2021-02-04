@@ -274,12 +274,12 @@ class BinarizeConv2d(nn.Conv2d):
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
-            #input.data = BinarizeLSQi.apply(input.data,self.beta)
-            input.data = LSQbi.apply(input.data,self.beta, nbits)
+            input.data = BinarizeLSQi.apply(input.data,self.beta)
+            #input.data = LSQbi.apply(input.data,self.beta, nbits)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        #self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
-        self.weight.data=LSQbw.apply(self.weight.org,self.alpha,nbits)
+        self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
+        #self.weight.data=LSQbw.apply(self.weight.org,self.alpha,nbits)
 
         out = nn.functional.conv2d(input, self.weight, None, self.stride,
                                    self.padding, self.dilation, self.groups)
