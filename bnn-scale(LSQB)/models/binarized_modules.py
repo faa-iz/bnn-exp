@@ -26,11 +26,12 @@ class BinarizeLSQw(Function):
         #set levels
         #Qn = -2**(nbits-1)
         #Qp = 2**(nbits-1) - 1
-        value =  value.clone()
+        step_size =  step_size.clone()
+
 
         v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
         v_hat = v_bar*step_size.view(v_bar.size(0),1,1,1)
-        return v_hat.clone()
+        return v_hat.clone
 
     @staticmethod
     def backward(self, grad_output):
