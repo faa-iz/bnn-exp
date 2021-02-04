@@ -32,6 +32,7 @@ class BinarizeLSQw(Function):
 
     @staticmethod
     def backward(self, grad_output):
+        print("testing if called")
         value, step_size = self.saved_tensors
         #nbits = self.other
 
