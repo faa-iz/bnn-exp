@@ -33,7 +33,7 @@ class BinarizeLSQw(Function):
 
 
         v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
-        v_hat = v_bar*step_size.view(v_bar.size(0),1,1,1)
+        v_hat = v_bar*step_size.data.view(v_bar.size(0),1,1,1)
         return v_hat.clone
 
     @staticmethod
