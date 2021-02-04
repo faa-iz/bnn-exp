@@ -4,8 +4,8 @@ import torchvision.transforms as transforms
 from torch.autograd import Function
 from .binarized_modules import  BinarizeLinear,BinarizeConv2d
 
-htan = nn.Identity()
-#htan = nn.Hardtanh(inplace=True)
+#htan = nn.Identity()
+htan = nn.Hardtanh(inplace=True)
 
 class VGG_Cifar10(nn.Module):
 
@@ -68,7 +68,7 @@ class VGG_Cifar10(nn.Module):
             nn.LogSoftmax()
         )
 
-        self.regime1 = {
+        self.regime = {
             0: {'optimizer': 'Adam', 'betas': (0.9, 0.999),'lr': 5e-3},
             40: {'lr': 1e-3},
             80: {'lr': 5e-4},
@@ -76,7 +76,7 @@ class VGG_Cifar10(nn.Module):
             120: {'lr': 5e-5},
             140: {'lr': 1e-5}
         }###binary
-        self.regime = {
+        self.regime1 = {
             0: {'optimizer': 'SGD', 'lr': 1e-2,
                 'weight_decay': 5e-4, 'momentum': 0.9},
             10: {'lr': 5e-3},
