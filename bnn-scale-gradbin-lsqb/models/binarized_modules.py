@@ -109,7 +109,7 @@ class LSQbw(Function):
         #set levels
         Qn = -2 ** (nbits - 1)
         Qp = 2 ** (nbits - 1)
-        grad_scale = 1.0 / math.sqrt(value.view(grad_output.size(0),-1).size(2) * Qp)
+        grad_scale = 1.0 / math.sqrt(value.view(grad_output.size(0),-1).size(1) * Qp)
 
         lower = (value/step_size.view(value.size(0),1,1,1) <= Qn).float()
         higher = (value/step_size.view(value.size(0),1,1,1) >= Qp).float()
