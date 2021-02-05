@@ -8,7 +8,8 @@ from torch.nn.parameter import Parameter
 
 import numpy as np
 
-nbits = 1
+nbitsw = 2
+nbitsa = 1
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
         #return tensor.sign()
@@ -216,7 +217,8 @@ class BinarizeLinear(nn.Linear):
 
     def forward(self, input):
         if self.init_state == 0:
-            print(nbits)
+            print(nbitsw)
+            print(nbitsa)
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
@@ -229,12 +231,12 @@ class BinarizeLinear(nn.Linear):
 
         if input.size(1) != 784:
             #input.data=BinarizeLSQi.apply(input.data,self.beta)
-            input=LSQbi.apply(input,self.beta, nbits)
+            input=LSQbi.apply(input,self.beta, nbitsa)
             #input.data = Binarize(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQi.apply(self.weight.org,self.alpha)
-        w_q =LSQbi.apply(self.weight,self.alpha,nbits)
+        w_q =LSQbi.apply(self.weight,self.alpha,nbitsw)
         out = nn.functional.linear(input, w_q)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
@@ -285,12 +287,12 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input.data = BinarizeLSQi.apply(input.data,self.beta)
-            input = LSQbi.apply(input,self.beta, nbits)
+            input = LSQbi.apply(input,self.beta, nbitsa)
             #input = Binarize(input)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
-        w_q =LSQbw.apply(self.weight,self.alpha,nbits)
+        w_q =LSQbw.apply(self.weight,self.alpha,nbitsw)
 
         out = nn.functional.conv2d(input, w_q, None, self.stride,
                                    self.padding, self.dilation, self.groups)
