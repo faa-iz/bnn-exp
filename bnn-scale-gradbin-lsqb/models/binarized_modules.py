@@ -229,8 +229,8 @@ class BinarizeLinear(nn.Linear):
 
         if input.size(1) != 784:
             #input.data=BinarizeLSQi.apply(input.data,self.beta)
-            #input=LSQbi.apply(input,self.beta, nbits)
-            input.data = Binarize(input.data)
+            input=LSQbi.apply(input,self.beta, nbits)
+            #input.data = Binarize(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQi.apply(self.weight.org,self.alpha)
@@ -278,15 +278,15 @@ class BinarizeConv2d(nn.Conv2d):
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
-            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1*init2)
+            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
             #self.step_size.data.copy_(torch.ones(1).cuda() * init1_ * init2)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
             #input.data = BinarizeLSQi.apply(input.data,self.beta)
-            #input = LSQbi.apply(input,self.beta, nbits)
-            input = Binarize(input)
+            input = LSQbi.apply(input,self.beta, nbits)
+            #input = Binarize(input)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
