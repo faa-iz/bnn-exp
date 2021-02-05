@@ -284,7 +284,8 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input.data = BinarizeLSQi.apply(input.data,self.beta)
-            input = LSQbi.apply(input,self.beta, nbits)
+            #input = LSQbi.apply(input,self.beta, nbits)
+            input = Binarize(input)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
