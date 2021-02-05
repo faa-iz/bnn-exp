@@ -95,6 +95,7 @@ class LSQbw(Function):
 
         #v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type()
         v_bar = ((value / step_size.view(value.size(0),1,1,1)).abs().ceil().clamp(1, Qp))*value.sign()
+        print(v_bar)
         v_hat = v_bar*step_size.view(value.size(0),1,1,1)
         return v_hat
 
