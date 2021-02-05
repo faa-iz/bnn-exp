@@ -229,7 +229,8 @@ class BinarizeLinear(nn.Linear):
 
         if input.size(1) != 784:
             #input.data=BinarizeLSQi.apply(input.data,self.beta)
-            input=LSQbi.apply(input,self.beta, nbits)
+            #input=LSQbi.apply(input,self.beta, nbits)
+            input.data = Binarize(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQi.apply(self.weight.org,self.alpha)
