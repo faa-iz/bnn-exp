@@ -157,6 +157,9 @@ def main():
         num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
+        for key in model.state_dict():
+            if ('conv' in key):
+                print(key)
         validate(val_loader, model, criterion, 0)
         return
 
@@ -169,9 +172,7 @@ def main():
     optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
     logging.info('training regime: %s', regime)
 
-    for key in model.state_dict():
-        if('conv' in key):
-            print(key)
+
     for epoch in range(args.start_epoch, args.epochs):
         optimizer = adjust_optimizer(optimizer, epoch, regime)
 
