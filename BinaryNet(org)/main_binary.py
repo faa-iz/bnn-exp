@@ -170,7 +170,8 @@ def main():
     logging.info('training regime: %s', regime)
 
     for key in model.state_dict():
-        print(key)
+        if('conv' in key):
+            print(key)
     for epoch in range(args.start_epoch, args.epochs):
         optimizer = adjust_optimizer(optimizer, epoch, regime)
 
