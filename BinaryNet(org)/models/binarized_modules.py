@@ -111,7 +111,7 @@ class BinarizeConv2d(nn.Conv2d):
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         self.weight.data=Binarize(self.weight.org)
-        print(self.weight)
+        #print(self.weight)
 
         out = nn.functional.conv2d(input, self.weight, None, self.stride,
                                    self.padding, self.dilation, self.groups)
