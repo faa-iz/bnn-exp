@@ -158,8 +158,8 @@ def main():
 
     if args.evaluate:
         for key in model.state_dict():
-            if ('conv' in key):
-                print(key)
+            #if ('conv' in key):
+            print(key)
         validate(val_loader, model, criterion, 0)
         return
 
