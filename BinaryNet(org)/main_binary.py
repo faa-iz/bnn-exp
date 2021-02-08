@@ -292,7 +292,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                              data_time=data_time, loss=losses, top1=top1, top5=top5))
         conv7u = model.state_dict()['features.7.weight']
         weights_update = ((abs(conv7.sign() - conv7u.sign()))/2)
-        print(weights_update)
+        print(weights_update.sum())
 
     return losses.avg, top1.avg, top5.avg
 
