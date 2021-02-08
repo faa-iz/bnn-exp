@@ -7,8 +7,14 @@ from torch.autograd import Function
 
 import numpy as np
 
+def Binarize(tensor,quant_mode='det'):
+    if quant_mode=='det':
+        #return tensor.sign()
+        return (tensor >= 0).type(tensor.type()) - (tensor < 0).type(tensor.type())
+    else:
+        return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
 
-class Binarize(Function):
+class Binarizet(Function):
     @staticmethod
     def forward(ctx, tensor):
         ctx.tensor = tensor
