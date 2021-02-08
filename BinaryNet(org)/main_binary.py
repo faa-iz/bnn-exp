@@ -157,9 +157,9 @@ def main():
         num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
-        for key in model.state_dict():
-            #if ('conv' in key):
-            print(key)
+        #for key in model.state_dict():
+        #    #if ('conv' in key):
+        #    print(key)
         validate(val_loader, model, criterion, 0)
         return
 
@@ -174,6 +174,8 @@ def main():
 
 
     for epoch in range(args.start_epoch, args.epochs):
+
+
         optimizer = adjust_optimizer(optimizer, epoch, regime)
 
         # train for one epoch
@@ -235,6 +237,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         data_time.update(time.time() - end)
         if args.gpus is not None:
             target = target.cuda()
+        conv7 = model.state_dict()['features.7.weight'] + model.state_dict()['features.7.bias']
 
         if not training:
             with torch.no_grad():
@@ -287,6 +290,9 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                              phase='TRAINING' if training else 'EVALUATING',
                              batch_time=batch_time,
                              data_time=data_time, loss=losses, top1=top1, top5=top5))
+        conv7u = model.state_dict()['features.7.weight'] + model.state_dict()['features.7.bias']
+        weights_update = ((abs(conv7.sign() - conv7u.sign()))/2)
+        print(weights_update)
 
     return losses.avg, top1.avg, top5.avg
 
