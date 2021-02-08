@@ -8,13 +8,22 @@ from torch.autograd import Function
 import numpy as np
 
 
-def Binarize(tensor,quant_mode='det'):
-    if quant_mode=='det':
-        return tensor.sign()
-    else:
-        return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
+class Binarize(Function):
+    @staticmethod
+    def forward(ctx, tensor):
+        ctx.tensor = tensor
+        #if quant_mode == 'det':
+        out =  tensor.sign()
+        return out
+        #else:
+        #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
 
-
+    @staticmethod
+    def backward(ctx, grad_output):
+        #print(ctx)
+        tensor= ctx.tensor
+        grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
+        return grad_input
 
 
 class HingeLoss(nn.Module):
