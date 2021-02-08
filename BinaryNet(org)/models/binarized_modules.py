@@ -88,10 +88,10 @@ class BinarizeLinear(nn.Linear):
     def forward(self, input):
 
         if input.size(1) != 784:
-            input.data=Binarize(input.data)
+            input.data=Binarizet.apply(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=Binarize(self.weight.org)
+        self.weight.data=Binarizet.apply(self.weight.org)
         out = nn.functional.linear(input, self.weight)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
@@ -107,10 +107,10 @@ class BinarizeConv2d(nn.Conv2d):
 
     def forward(self, input):
         if input.size(1) != 3:
-            input.data = Binarize(input.data)
+            input.data = Binarizet.apply(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=Binarize(self.weight.org)
+        self.weight.data=Binarizet.apply(self.weight.org)
         #print(self.weight)
 
         out = nn.functional.conv2d(input, self.weight, None, self.stride,
