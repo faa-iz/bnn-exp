@@ -280,6 +280,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         end = time.time()
         conv7u = model.state_dict()['features.7.weight']
         weights_update = ((abs(conv7.sign() - conv7u.sign())) / 2)
+        print(weights_update)
         size = conv7.numel()
         if i % args.print_freq == 0:
             logging.info('{phase} - Epoch: [{0}][{1}/{2}]\t'
