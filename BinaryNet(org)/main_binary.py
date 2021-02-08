@@ -278,7 +278,9 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
-
+        conv7u = model.state_dict()['features.7.weight']
+        weights_update = ((abs(conv7.sign() - conv7u.sign())) / 2)
+        size = conv7.numel()
         if i % args.print_freq == 0:
             logging.info('{phase} - Epoch: [{0}][{1}/{2}]\t'
                          'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
@@ -290,9 +292,8 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                              phase='TRAINING' if training else 'EVALUATING',
                              batch_time=batch_time,
                              data_time=data_time, loss=losses, top1=top1, top5=top5))
-        conv7u = model.state_dict()['features.7.weight']
-        weights_update = ((abs(conv7.sign() - conv7u.sign()))/2)
-        print(weights_update.sum())
+
+            print((weights_update.sum()/size)*100)
 
     return losses.avg, top1.avg, top5.avg
 
