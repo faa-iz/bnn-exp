@@ -32,7 +32,7 @@ class Binarizet(Function):
 
         perc = np.percentile(grad_input,prune)
         mask = grad_input>=perc
-        grad_input = grad_input*mask
+        #grad_input = grad_input*mask
         return grad_input * grad_output
 
 
