@@ -35,7 +35,7 @@ class Binarizet(Function):
         perc = np.percentile(out.cpu().numpy(),prune)
         print('backward')
         mask = out>=perc
-        #grad_input = grad_input*mask
+        out = out*mask
         return out
 
 
