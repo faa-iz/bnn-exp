@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.autograd import Function
 
 import numpy as np
-
+prune = 50
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
         #return tensor.sign()
@@ -28,8 +28,12 @@ class Binarizet(Function):
     def backward(ctx, grad_output):
         #print(ctx)
         tensor= ctx.tensor
-        grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
-        return grad_input
+        grad_input = (1 - torch.pow(torch.tanh(tensor), 2))
+
+        perc = np.percentile(grad_input,prune)
+        mask = grad_input>=perc
+        grad_input = grad_input*mask
+        return grad_input * grad_output
 
 
 class HingeLoss(nn.Module):
