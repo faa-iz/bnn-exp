@@ -24,22 +24,22 @@ class Binarizet(Function):
         #else:
         #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
 
-    '''
+    #'''
     @staticmethod
     
     def backward(ctx, grad_output):
         #print(ctx)
         tensor= ctx.tensor
-        #grad_input = (1 - torch.pow(torch.tanh(tensor), 2))
+        grad_input = (1 - torch.pow(torch.tanh(tensor), 2))
 
-        out = grad_output
+        out = grad_output*grad_input
 
-        perc = np.percentile(out.abs().cpu().numpy(),prune)
+        #perc = np.percentile(out.abs().cpu().numpy(),prune)
         #print('backward')
-        mask = out.abs()>=perc
-        out = out*mask
+        #mask = out.abs()>=perc
+        #out = out*mask
         return out
-    '''
+    #'''
 
 class HingeLoss(nn.Module):
     def __init__(self):
