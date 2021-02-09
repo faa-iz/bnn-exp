@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.autograd import Function
 
 import numpy as np
-prune = 0
+prune = 50
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
         #return tensor.sign()
@@ -34,9 +34,9 @@ class Binarizet(Function):
 
         out = grad_output#*grad_input
 
-        #perc = np.percentile(out.abs().cpu().numpy(),prune)
-        #mask = out.abs()>=perc
-        #out = out*mask
+        perc = np.percentile(out.abs().cpu().numpy(),prune)
+        mask = out.abs()>=perc
+        out = out*mask
         return out
     #'''
 
