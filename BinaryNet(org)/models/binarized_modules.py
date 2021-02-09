@@ -30,7 +30,7 @@ class Binarizet(Function):
         tensor= ctx.tensor
         grad_input = (1 - torch.pow(torch.tanh(tensor), 2))
 
-        perc = np.percentile(grad_input,prune)
+        perc = np.percentile(grad_input.cpu().numpy(),prune)
         print('backward')
         mask = grad_input>=perc
         #grad_input = grad_input*mask
