@@ -45,7 +45,7 @@ parser.add_argument('--gpus', default='0',
                     help='gpus used for training - e.g 0,1,3')
 parser.add_argument('-j', '--workers', default=8, type=int, metavar='N',
                     help='number of data loading workers (default: 8)')
-parser.add_argument('--epochs', default=2500, type=int, metavar='N',
+parser.add_argument('--epochs', default=25, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
@@ -122,7 +122,7 @@ def main():
         if os.path.isfile(checkpoint_file):
             logging.info("loading checkpoint '%s'", args.resume)
             checkpoint = torch.load(checkpoint_file)
-            args.start_epoch = checkpoint['epoch'] - 1
+            args.start_epoch = 0#checkpoint['epoch'] - 1
             best_prec1 = checkpoint['best_prec1']
             model.load_state_dict(checkpoint['state_dict'])
             logging.info("loaded checkpoint '%s' (epoch %s)",
