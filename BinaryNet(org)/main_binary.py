@@ -237,7 +237,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
         data_time.update(time.time() - end)
         if args.gpus is not None:
             target = target.cuda()
-        conv7 = model.state_dict()['features.7.weight']
+        #conv7conv7 = model.state_dict()['features.7.weight']
 
         if not training:
             with torch.no_grad():
