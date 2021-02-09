@@ -177,7 +177,7 @@ def main():
 
 
         optimizer = adjust_optimizer(optimizer, epoch, regime)
-
+        print(optimizer)
         # train for one epoch
         train_loss, train_prec1, train_prec5 = train(
             train_loader, model, criterion, epoch, optimizer)
