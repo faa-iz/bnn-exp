@@ -113,7 +113,7 @@ class BinarizeConv2d(nn.Conv2d):
 
     def forward(self, input):
         if self.init_state == 0:
-            #self.weight.data.uniform_(0,0)
+            self.weight.data.uniform_(0,0)
             self.init_state.fill_(1)
 
 
