@@ -115,7 +115,7 @@ class BinarizeConv2d(nn.Conv2d):
 
     def forward(self, input):
         if self.init_state == 0:
-            self.weight.data = (torch.zeros(self.weight.shape)-0.5) * 0.001
+            self.weight.data = (torch.zeros(self.weight.shape).cuda()-0.5) * 0.001
             self.init_state.fill_(1)
 
 
