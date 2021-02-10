@@ -6,7 +6,7 @@ from torch.autograd import Variable
 from torch.autograd import Function
 
 import numpy as np
-prune = 50
+prune = 90
 def Binarize(tensor,quant_mode='det'):
     if quant_mode=='det':
         #return tensor.sign()
