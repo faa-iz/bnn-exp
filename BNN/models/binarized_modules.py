@@ -24,7 +24,7 @@ class Binarizet(Function):
         #else:
         #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
 
-    '''
+
     @staticmethod
     
     def backward(ctx, grad_output):
@@ -34,11 +34,9 @@ class Binarizet(Function):
 
         out = grad_output#*grad_input
 
-        perc = np.percentile(out.abs().cpu().numpy(),prune)
-        mask = out.abs()>=perc
-        out = out*mask
+
         return out
-    '''
+
 
 class HingeLoss(nn.Module):
     def __init__(self):
