@@ -34,7 +34,7 @@ class BinarizeLSQw(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print("backward")
+        #print("backward")
         value, step_size = self.saved_tensors
         #nbits = self.other
 
@@ -75,7 +75,7 @@ class BinarizeLSQi(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print('backward1')
+        #print('backward1')
         value, step_size = self.saved_tensors
         nbits, signed = self.other
 
