@@ -79,9 +79,10 @@ class BinarizeLSQi(Function):
         higher = (value/step_size >= Qp).float()
         middle = (1.0 - higher - lower)
 
-        middle  = (1 - torch.pow(torch.tanh(value), 2))*middle
+        middle  = (1 - torch.pow(torch.tanh(value), 2))#*middle
 
-        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+        #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+        grad_step_size = middle*(-value/step_size + (value/step_size).round())
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None, None
 '''
