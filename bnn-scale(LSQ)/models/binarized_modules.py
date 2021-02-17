@@ -66,15 +66,12 @@ class BinarizeLSQi(Function):
     def backward(self, grad_output):
         #print('backward1')
         value, step_size = self.saved_tensors
-        nbits, signed = self.other
+        #nbits, signed = self.other
 
         #set levels
-        if signed:
-            Qn = -2**(nbits-1)
-            Qp = 2**(nbits-1) - 1
-        else:
-            Qn = 0
-            Qp = 2**nbits - 1
+
+        Qn = -1
+        Qp = 1
 
         grad_scale = 1.0 / math.sqrt(value.numel() * Qp)
 
