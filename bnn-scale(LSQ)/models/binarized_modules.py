@@ -43,8 +43,8 @@ class BinarizeLSQw(Function):
         Qp = 1
         grad_scale = 1.0 / math.sqrt(value.numel() * Qp)
 
-        lower = (value/step_size <= Qn).float()
-        higher = (value/step_size >= Qp).float()
+        lower = (value/step_size.view(value.size(0),1,1,1) <= Qn).float()
+        higher = (value/step_size.view(value.size(0),1,1,1) >= Qp).float()
         middle = (1.0 - higher - lower)
 
         grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + (value/step_size.view(value.size(0),1,1,1)).round())
