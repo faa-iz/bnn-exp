@@ -50,7 +50,7 @@ class BinarizeLSQw(Function):
         grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + (value/step_size.view(value.size(0),1,1,1)).round())
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil()))
 
-        return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
+        return grad_output*middle, (grad_output*grad_step_size*grad_scale).view(grad_output.size(0),-1).sum(-1), None
 
 class BinarizeLSQi(Function):
     @staticmethod
