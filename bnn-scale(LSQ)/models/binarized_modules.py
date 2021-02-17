@@ -55,22 +55,11 @@ class BinarizeLSQw(Function):
 class BinarizeLSQi(Function):
     @staticmethod
     def forward(self, value, step_size):
-        nbits = 3
-        signed = True
-        print('forward')
         self.save_for_backward(value, step_size)
-        self.other = nbits, signed
 
-        #set levels
-        if signed:
-            Qn = -2**(nbits-1)
-            Qp = 2**(nbits-1) - 1
-        else:
-            Qn = 0
-            Qp = 2**nbits - 1
 
-        v_bar = (value/step_size).round().clamp(Qn, Qp)
-        v_hat = v_bar*step_size
+        v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type())
+        v_hat = v_bar * step_size
         return v_hat
 
     @staticmethod
