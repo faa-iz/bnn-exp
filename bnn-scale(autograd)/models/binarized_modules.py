@@ -87,18 +87,18 @@ class BinarizeLinear(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
-        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        self.alpha = Parameter(torch.ones(1))
         # self.beta = Parameter(torch.ones(self.weight.size(0)))
         self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, input):
         if self.init_state == 0:
-            init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
+            init1 = self.weight.abs().mean()
             init2 =  input.abs().mean()
             if input.size(1) != 784:
-                self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1*init2)
+                self.alpha.data.copy_(torch.ones(1).cuda() * init1*init2)
             else:
-                self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+                self.alpha.data.copy_(torch.ones(1).cuda() * init1)
             #self.beta.data.copy_(torch.ones(self.weight.size(0)).cuda() * init2)
             self.init_state.fill_(1)
 
@@ -107,7 +107,7 @@ class BinarizeLinear(nn.Linear):
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         bw=Binarize().apply(self.weight)
-        sw = bw * self.alpha.view(bw.size(0), 1, 1, 1)
+        sw = bw * self.alpha
         out = nn.functional.linear(input, sw)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
