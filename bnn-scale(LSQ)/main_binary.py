@@ -284,7 +284,7 @@ def forward(data_loader, model, criterion, epoch=0, training=True, optimizer=Non
                              phase='TRAINING' if training else 'EVALUATING',
                              batch_time=batch_time,
                              data_time=data_time, loss=losses, top1=top1, top5=top5))
-            print(model.state_dict()['features.3.beta'])
+            #print(model.state_dict()['features.3.beta'])
 
     return losses.avg, top1.avg, top5.avg
 
