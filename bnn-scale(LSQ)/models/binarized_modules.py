@@ -75,7 +75,7 @@ class BinarizeLSQi(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print('backward')
+        print('backward1')
         value, step_size = self.saved_tensors
         nbits, signed = self.other
 
@@ -186,15 +186,31 @@ class BinarizeLinear(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
+        self.alpha = Parameter(torch.ones(1))
+        self.beta = Parameter(torch.ones(1))
+        self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, input):
+        if self.init_state == 0:
+            init1 = self.weight.abs().mean()
+            init2 =  input.abs().mean()
+
+            self.alpha.data.copy_(torch.ones(1).cuda() * init1)
+
+            self.beta.data.copy_(torch.ones(1).cuda() * init2)
+            #self.beta.data.copy_(torch.ones(self.weight.size(0)).cuda() * init2)
+            self.init_state.fill_(1)
+
 
         if input.size(1) != 784:
-            input.data=Binarize(input.data)
+            #input.data=Binarize(input.data)
+            input.data=BinarizeLSQi.apply(input,self.beta)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=Binarize(self.weight.org)
-        out = nn.functional.linear(input, self.weight)
+        #self.weight.data=Binarize(self.weight.org)
+        sw=BinarizeLSQi.apply(self.weight,self.alpha)
+
+        out = nn.functional.linear(input, sw)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
             out += self.bias.view(1, -1).expand_as(out)
