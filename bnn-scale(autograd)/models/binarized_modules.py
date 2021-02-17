@@ -87,15 +87,28 @@ class BinarizeLinear(nn.Linear):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeLinear, self).__init__(*kargs, **kwargs)
+        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        # self.beta = Parameter(torch.ones(self.weight.size(0)))
+        self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, input):
+        if self.init_state == 0:
+            init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
+            init2 =  input.abs().mean()
+            if input.size(1) != 784:
+                self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1*init2)
+            else:
+                self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            #self.beta.data.copy_(torch.ones(self.weight.size(0)).cuda() * init2)
+            self.init_state.fill_(1)
 
         if input.size(1) != 784:
             input.data=Binarize().apply(input.data)
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
-        self.weight.data=Binarize().apply(self.weight.org)
-        out = nn.functional.linear(input, self.weight)
+        bw=Binarize().apply(self.weight)
+        sw = bw * self.alpha.view(bw.size(0), 1, 1, 1)
+        out = nn.functional.linear(input, sw)
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
             out += self.bias.view(1, -1).expand_as(out)
@@ -117,7 +130,10 @@ class BinarizeConv2d(nn.Conv2d):
         if self.init_state == 0:
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init2 =  input.abs().mean()
-            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1*init2)
+            if input.size(1) != 3:
+                self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1*init2)
+            else:
+                self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             #self.beta.data.copy_(torch.ones(self.weight.size(0)).cuda() * init2)
             self.init_state.fill_(1)
 
@@ -133,9 +149,9 @@ class BinarizeConv2d(nn.Conv2d):
 
         #print(self.alpha.shape)
         #print(bw.shape)
-        sw = bw
-        if input.size(1) != 3:
-            sw = bw*self.alpha.view(bw.size(0),1,1,1)#*self.beta.view(bw.size(0),1,1,1)
+        #sw = bw
+
+        sw = bw*self.alpha.view(bw.size(0),1,1,1)#*self.beta.view(bw.size(0),1,1,1)
 
 
         out = nn.functional.conv2d(input, sw, None, self.stride,
