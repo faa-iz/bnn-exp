@@ -48,7 +48,7 @@ class BasicBlock(nn.Module):
 
         out = self.conv1(x)
         out = self.bn1(out)
-        out = self.tanh1(out)
+        #out = self.tanh1(out)
 
         out = self.conv2(out)
 
@@ -61,7 +61,7 @@ class BasicBlock(nn.Module):
         out += residual
         if self.do_bntan:
             out = self.bn2(out)
-            out = self.tanh2(out)
+            #out = self.tanh2(out)
 
         return out
 
@@ -133,7 +133,7 @@ class ResNet(nn.Module):
         x = self.conv1(x)
         x = self.maxpool(x)
         x = self.bn1(x)
-        x = self.tanh1(x)
+        #x = self.tanh1(x)
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
