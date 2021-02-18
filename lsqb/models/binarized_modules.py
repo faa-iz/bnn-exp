@@ -49,7 +49,7 @@ class LSQbi(Function):
 
         gradLower = (Qn - (value/step_size)).clamp(0,1)
         gradHigher = (Qp - (value/step_size)).clamp(-1,0)
-        gradMiddle = -value/step_size + value.sign()*((value/step_size).abs().ceil())
+        gradMiddle = -value/step_size + value.sign()
 
         weight_grad = (1 - torch.pow(torch.tanh(value), 2))
 
