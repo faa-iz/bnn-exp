@@ -54,7 +54,7 @@ class LSQbi(Function):
         weight_grad = (1 - torch.pow(torch.tanh(value), 2))
 
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
-        grad_step_size = -lower*Qn + higher*Qp + middle*gradMiddle
+        grad_step_size = lower*Qn + higher*Qp + middle*gradMiddle
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
