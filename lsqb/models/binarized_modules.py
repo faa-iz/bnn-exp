@@ -56,7 +56,7 @@ class LSQbi(Function):
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         grad_step_size = lower*gradLower + higher*gradHigher + middle*gradMiddle
 
-        return grad_output*weight_grad, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
+        return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 
 
