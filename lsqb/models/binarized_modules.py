@@ -24,8 +24,8 @@ class LSQbi(Function):
         self.other = nbits
 
         #set levels
-        Qn = -2**(nbits-1)
-        Qp = 2**(nbits-1)
+        Qn = -1
+        Qp = 1
 
         #v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type()
         v_bar = value.sign()
@@ -39,8 +39,8 @@ class LSQbi(Function):
         nbits = self.other
 
         #set levels
-        Qn = -2 ** (nbits - 1)
-        Qp = 2 ** (nbits - 1)
+        Qn = -1
+        Qp = 1
         grad_scale = 1.0 / (2*math.sqrt(value.numel() * Qp))
 
         lower = (value/step_size <= Qn).float()
