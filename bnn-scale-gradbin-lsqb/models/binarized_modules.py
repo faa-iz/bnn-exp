@@ -103,7 +103,7 @@ class LSQbw(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print('backward')
+        #[[print('backward')
         value, step_size = self.saved_tensors
         nbits = self.other
 
@@ -146,7 +146,7 @@ class LSQbi(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        print('backward2')
+        #print('backward2')
         value, step_size = self.saved_tensors
         nbits = self.other
 
