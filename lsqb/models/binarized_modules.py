@@ -41,7 +41,7 @@ class LSQbi(Function):
         #set levels
         Qn = -1
         Qp = 1
-        grad_scale = 1.0 / (2*math.sqrt(value.numel() * Qp))
+        grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
 
         lower = (value/step_size <= Qn).float()
         higher = (value/step_size >= Qp).float()
