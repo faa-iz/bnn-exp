@@ -28,7 +28,7 @@ class LSQbi(Function):
         Qp = 2**(nbits-1)
 
         #v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type()
-        v_bar = ((value / step_size).abs().ceil().clamp(1, Qp))*value.sign()
+        v_bar = value.sign()
         v_hat = v_bar*step_size
         return v_hat
 
