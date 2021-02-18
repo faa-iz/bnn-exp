@@ -277,7 +277,8 @@ class BinarizeConv2d(nn.Conv2d):
     def __init__(self, *kargs, **kwargs):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
 
-        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        #self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        self.alpha = Parameter(torch.ones(1))
         self.beta = Parameter(torch.ones(1))
         #self.step_size = Parameter(torch.ones(1))
         self.register_buffer('init_state', torch.zeros(1))
