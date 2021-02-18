@@ -154,8 +154,12 @@ class LSQbi(Function):
         higher = (value/step_size >= Qp).float()
         middle = (1.0 - higher - lower)
 
+        gradLower = min(Qn - (value/step_size) ,  1)
+        gradHigher = max(Qp - (value/step_size), -1)
+        gradMiddle = -value/step_size + value.sign()*((value/step_size).abs().ceil())
+
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
-        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + value.sign()*((value/step_size).abs().ceil()))
+        grad_step_size = lower*gradLower + higher*gradHigher + middle*gradMiddle
 
         return grad_output*middle, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
