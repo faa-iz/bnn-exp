@@ -290,6 +290,7 @@ class BinarizeConv2d(nn.Conv2d):
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            self.alpha.data.copy_(torch.ones(1).cuda() * init1)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
             #self.step_size.data.copy_(torch.ones(1).cuda() * init1_ * init2)
             self.init_state.fill_(1)
@@ -301,7 +302,7 @@ class BinarizeConv2d(nn.Conv2d):
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         #self.weight.data=BinarizeLSQw.apply(self.weight.org,self.alpha)
-        w_q =LSQbw.apply(self.weight,self.alpha,nbitsw)
+        w_q =LSQbi.apply(self.weight,self.alpha,nbitsw)
         #w_q =Binarize(self.weight)
 
         out = nn.functional.conv2d(input, w_q, None, self.stride,
