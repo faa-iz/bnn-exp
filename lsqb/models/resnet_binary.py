@@ -54,8 +54,8 @@ class BasicBlock(nn.Module):
 
 
         if self.downsample is not None:
-            if residual.data.max()>1:
-                import pdb; pdb.set_trace()
+            #if residual.data.max()>1:
+            #    import pdb; pdb.set_trace()
             residual = self.downsample(residual)
 
         out += residual
