@@ -103,7 +103,7 @@ class LSQbw(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        #print('backward')
+        print('backward')
         value, step_size = self.saved_tensors
         nbits = self.other
 
@@ -116,8 +116,13 @@ class LSQbw(Function):
         higher = (value/step_size.view(value.size(0),1,1,1) >= Qp).float()
         middle = (1.0 - higher - lower)
 
+        gradLower = (Qn - (value / step_size.view(value.size(0),1,1,1))).clamp(0, 1)
+        gradHigher = (Qp - (value / step_size.view(value.size(0),1,1,1))).clamp(-1, 0)
+        gradMiddle = -value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil())
+
+
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
-        grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size.view(value.size(0),1,1,1) + value.sign()*((value/step_size.view(value.size(0),1,1,1)).abs().ceil()))
+        grad_step_size = lower*gradLower + higher*gradHigher + middle*gradMiddle
         #print(grad_output.shape)
         #print(grad_step_size.shape)
         #return grad_output*middle, ((grad_output*grad_step_size)*grad_scale).sum().unsqueeze(dim=0), None
@@ -141,7 +146,7 @@ class LSQbi(Function):
 
     @staticmethod
     def backward(self, grad_output):
-        #print('backward2')
+        print('backward2')
         value, step_size = self.saved_tensors
         nbits = self.other
 
@@ -154,8 +159,8 @@ class LSQbi(Function):
         higher = (value/step_size >= Qp).float()
         middle = (1.0 - higher - lower)
 
-        gradLower = min(Qn - (value/step_size) ,  1)
-        gradHigher = max(Qp - (value/step_size), -1)
+        gradLower = (Qn - (value/step_size)).clamp(0,1)
+        gradHigher = (Qp - (value/step_size)).clamp(-1,0)
         gradMiddle = -value/step_size + value.sign()*((value/step_size).abs().ceil())
 
         #grad_step_size = lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
