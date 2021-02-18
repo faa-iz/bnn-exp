@@ -149,7 +149,7 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input.data = Binarize(input.data)
-            input.data = LSQbi.apply(input.data,self.beta,1)
+            input = LSQbi.apply(input,self.beta,1)
 
 
 
