@@ -98,7 +98,7 @@ class scale_out(Function):
         grad =  grad/(torch.max(grad.abs()))
         grad = grad*grad_scale
 
-        return None, None, None, (grad_output*grad).sum().unsqueeze(dim=0)
+        return None, None, None, None,None,None,None,(grad_output*grad).sum().unsqueeze(dim=0)
 
 
 
