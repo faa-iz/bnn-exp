@@ -186,7 +186,8 @@ class BinarizeConv2d(nn.Conv2d):
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
-            inputq = Binarize(input)
+            input_c = torch.clamp(input)
+            inputq = Binarize(input_c)
         else:
             inputq = input
             #input = LSQbi.apply(input,self.beta,1)
