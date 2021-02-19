@@ -85,10 +85,6 @@ class scale_out(Function):
 
 
 
-        real_out = nn.functional.conv2d(input, weight, None, stride,
-                                   padding, dilation, groups)
-
-
         #set levels
         Qn = -1
         Qp = 1
