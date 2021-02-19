@@ -200,7 +200,7 @@ class BinarizeConv2d(nn.Conv2d):
                                    self.padding, self.dilation, self.groups)
 
 
-        print(self.weight)
+        print(wq)
         out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
         if not self.bias is None:
