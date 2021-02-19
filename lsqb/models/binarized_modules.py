@@ -181,7 +181,10 @@ class BinarizeConv2d(nn.Conv2d):
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
             #self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
-            self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
+            if input.size(1) != 3:
+                self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
+            else:
+                self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
             self.init_state.fill_(1)
 
