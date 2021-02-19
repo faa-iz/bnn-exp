@@ -22,7 +22,7 @@ class LSQbi(Function):
         #print('forward2')
         print('-------------')
         print(step_size)
-        value  =  value.clamp(-step_size.cpu().detach().numpy(),step_size.cpu().detach().numpy())
+        value  =  value.clamp(-step_size[0],step_size[0])
         self.save_for_backward(value, step_size)
         self.other = nbits
 
