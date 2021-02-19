@@ -64,7 +64,10 @@ class LSQbi(Function):
         return grad_output*weight_grad, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 
-class scale_out(Function):
+class scale_out(nn.Conv2d):
+    def __init__(self, *kargs, **kwargs):
+        super(scale_out, self).__init__(*kargs, **kwargs)
+
     @staticmethod
     def forward(self, out, weight, input, scale):
         #print('forward2')
