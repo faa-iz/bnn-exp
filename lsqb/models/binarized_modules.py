@@ -21,7 +21,7 @@ class LSQbi(Function):
     def forward(self, value, step_size, nbits):
         #print('forward2')
         print('-------------')
-        print(step_size[0])
+        print(step_size.data)
         value  =  value.clamp(-step_size[0],step_size[0])
         self.save_for_backward(value, step_size)
         self.other = nbits
