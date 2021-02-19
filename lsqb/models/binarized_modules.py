@@ -201,7 +201,7 @@ class BinarizeConv2d(nn.Conv2d):
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
-        out =  scale_out(out,self.weight,input,self.alpha)
+        out =  scale_out.apply(out,self.weight,input,self.alpha)
 
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
