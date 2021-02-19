@@ -184,6 +184,13 @@ class reactnet(nn.Module):
                 self.feature.append(BasicBlock(stage_out_channel[i-1], stage_out_channel[i], 1))
         self.pool1 = nn.AdaptiveAvgPool2d(1)
         self.fc = nn.Linear(1024, num_classes)
+        self.regime = {
+            0: {'optimizer': 'Adam', 'lr': 5e-3},
+            101: {'lr': 1e-3},
+            142: {'lr': 5e-4},
+            184: {'lr': 1e-4},
+            220: {'lr': 1e-5}
+        }
 
     def forward(self, x):
         for i, block in enumerate(self.feature):
