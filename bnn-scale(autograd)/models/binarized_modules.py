@@ -107,8 +107,10 @@ class BinarizeLinear(nn.Linear):
         if not hasattr(self.weight,'org'):
             self.weight.org=self.weight.data.clone()
         bw=Binarize().apply(self.weight)
-        sw = bw * self.alpha
+        sw = bw# * self.alpha
         out = nn.functional.linear(input, sw)
+
+
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
             out += self.bias.view(1, -1).expand_as(out)
