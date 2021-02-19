@@ -109,7 +109,7 @@ class scale_out(Function):
 
 
         grad = scale - real_out.abs()
-        grad =  grad/(2*torch.max(grad.abs()))
+        grad =  grad.clamp(-0.25,0.25)
         grad = grad*grad_scale
 
         return None, None, None, None,None,None,None,(grad_output*grad).sum().unsqueeze(dim=0)
