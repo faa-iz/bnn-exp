@@ -64,16 +64,14 @@ class LSQbi(Function):
         return grad_output*weight_grad, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 
-class scale_out(nn.Conv2d):
-    def __init__(self, *kargs, **kwargs):
-        super(scale_out, self).__init__(*kargs, **kwargs)
+class scale_out(Function):
 
     @staticmethod
-    def forward(self, out, weight, input, scale):
+    def forward(self, stride, padding, dilation, groups, out, weight, input, scale):
         #print('forward2')
         #print('-------------')
         #print(step_size.data)
-        self.save_for_backward(weight, input, scale)
+        self.save_for_backward(stride, padding, dilation, groups, weight, input, scale)
         self.other = nbits
 
         out = out*scale
@@ -82,12 +80,12 @@ class scale_out(nn.Conv2d):
     @staticmethod
     def backward(self, grad_output):
         #print('backward2')
-        weight, input, scale = self.saved_tensors
+        stride, padding, dilation, groups, weight, input, scale = self.saved_tensors
         nbits = self.other
 
 
-        real_out = nn.functional.conv2d(input, weight, None, self.stride,
-                                   self.padding, self.dilation, self.groups)
+        real_out = nn.functional.conv2d(input, weight, None, stride,
+                                   padding, dilation, groups)
 
 
         #set levels
@@ -204,7 +202,7 @@ class BinarizeConv2d(nn.Conv2d):
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
-        out =  scale_out.apply(out,self.weight,input,self.alpha)
+        out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
