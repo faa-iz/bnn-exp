@@ -148,7 +148,7 @@ class BinarizeConv2d(nn.Conv2d):
                                    self.padding, self.dilation, self.groups)
 
         print(out.shape)
-        out = out * self.alpha.view(bw.size(0),1,1,1)
+        out = out * self.alpha.view(1,out.size(1),1,1)
         if not self.bias is None:
             self.bias.org = self.bias.data.clone()
             out += self.bias.view(1, -1, 1, 1).expand_as(out)
