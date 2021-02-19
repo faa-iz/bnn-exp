@@ -16,6 +16,23 @@ def Binarize(tensor,quant_mode='det'):
     else:
         return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0,1).round().mul_(2).add_(-1)
 
+
+class Binarizet(Function):
+    @staticmethod
+    def forward(ctx, tensor):
+        ctx.tensor = tensor
+        #if quant_mode == 'det':
+        out =  tensor.sign()
+        return out
+        #else:
+        #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        #print(ctx)
+        tensor= ctx.tensor
+        grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
+        return grad_input, None, None
 class LSQbi(Function):
     @staticmethod
     def forward(self, value, step_size, nbits):
@@ -190,14 +207,14 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             input_c = input.clamp(-1,1)
-            inputq = Binarize(input_c)
+            inputq = Binarizet.apply(input_c)
         else:
             inputq = input
             #input = LSQbi.apply(input,self.beta,1)
 
 
 
-        wq=Binarize(self.weight)
+        wq=Binarizet.apply(self.weight)
         #wq = LSQbi.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
