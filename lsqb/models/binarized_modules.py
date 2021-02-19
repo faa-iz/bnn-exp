@@ -64,6 +64,41 @@ class LSQbi(Function):
         return grad_output*weight_grad, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 
+class scale_out(Function):
+    @staticmethod
+    def forward(self, out, weight, input, scale):
+        #print('forward2')
+        #print('-------------')
+        #print(step_size.data)
+        self.save_for_backward(weight, input, scale)
+        self.other = nbits
+
+        out = out*scale
+        return out
+
+    @staticmethod
+    def backward(self, grad_output):
+        #print('backward2')
+        weight, input, scale = self.saved_tensors
+        nbits = self.other
+
+
+        real_out = nn.functional.conv2d(input, weight, None, self.stride,
+                                   self.padding, self.dilation, self.groups)
+
+
+        #set levels
+        Qn = -1
+        Qp = 1
+        grad_scale = 1.0 / (math.sqrt(real_out.numel()))
+
+
+        grad = scale - real_out.abs()
+        grad =  grad/(torch.max(grad.abs()))
+        grad = grad*grad_scale
+
+        return None, None, None, (grad_output*grad).sum().unsqueeze(dim=0)
+
 
 
 class HingeLoss(nn.Module):
@@ -148,24 +183,27 @@ class BinarizeConv2d(nn.Conv2d):
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
             #self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
-            self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
+            self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
-            #input.data = Binarize(input.data)
-            input = LSQbi.apply(input,self.beta,1)
+            inputq = Binarize(input.data)
+            #input = LSQbi.apply(input,self.beta,1)
 
 
 
-        #self.weight.data=Binarize(self.weight.org)
-        wq = LSQbi.apply(self.weight, self.alpha,1)
+        wq=Binarize(self.weight.org)
+        #wq = LSQbi.apply(self.weight, self.alpha,1)
 
-        out = nn.functional.conv2d(input, wq, None, self.stride,
+        out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
+
+        out =  scale_out(out,self.weight,input,self.alpha)
 
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
             out += self.bias.view(1, -1, 1, 1).expand_as(out)
+
 
         return out
