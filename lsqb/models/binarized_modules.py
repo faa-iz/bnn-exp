@@ -71,8 +71,10 @@ class scale_out(Function):
         #print('forward2')
         #print('-------------')
         #print(step_size.data)
-        self.save_for_backward(stride, padding, dilation, groups, weight, input, scale)
-        self.other = nbits
+        real_out = nn.functional.conv2d(input, weight, None, stride,
+                                        padding, dilation, groups)
+        self.save_for_backward(real_out, scale)
+
 
         out = out*scale
         return out
@@ -80,8 +82,8 @@ class scale_out(Function):
     @staticmethod
     def backward(self, grad_output):
         #print('backward2')
-        stride, padding, dilation, groups, weight, input, scale = self.saved_tensors
-        nbits = self.other
+        real_out, scale = self.saved_tensors
+
 
 
         real_out = nn.functional.conv2d(input, weight, None, stride,
