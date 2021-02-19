@@ -71,8 +71,7 @@ class scale_out(Function):
         #print('forward2')
         #print('-------------')
         #print(step_size.data)
-        real_out = nn.functional.conv2d(input, weight, None, stride,
-                                        padding, dilation, groups)
+        real_out = nn.functional.conv2d(input, weight, None, stride,padding, dilation, groups)
         self.save_for_backward(real_out, scale)
 
 
