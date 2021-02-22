@@ -5,7 +5,7 @@ from .binarized_modules import  BinarizeLinear,BinarizeConv2d
 
 
 #tanh = nn.Hardtanh(inplace=True)
-tanh = None
+tanh =nn.Identity()
 __all__ = ['resnet_binary']
 
 def Binaryconv3x3(in_planes, out_planes, stride=1):
