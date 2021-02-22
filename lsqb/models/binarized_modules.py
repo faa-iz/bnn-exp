@@ -33,14 +33,15 @@ class Binarizet(Function):
         tensor= ctx.tensor
         grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
         return grad_input, None, None
+
 class LSQbi(Function):
     @staticmethod
     def forward(self, value, step_size, nbits):
         #print('forward2')
         #print('-------------')
         #print(step_size.data)
-        value  =  torch.where(value > step_size,step_size,value)
-        value  =  torch.where(value < -step_size,-step_size,value)
+        #value  =  torch.where(value > step_size,step_size,value)
+        #value  =  torch.where(value < -step_size,-step_size,value)
 
         self.save_for_backward(value, step_size)
         self.other = nbits
@@ -69,16 +70,18 @@ class LSQbi(Function):
         higher = (value/step_size >= Qp).float()
         middle = (1.0 - higher - lower)
 
-        gradLower = (Qn - (value/step_size)).clamp(0,1)
-        gradHigher = (Qp - (value/step_size)).clamp(-1,0)
-        gradMiddle = -value/step_size + value.sign()
+        #gradLower = (Qn - (value/step_size)).clamp(0,1)
+        #gradHigher = (Qp - (value/step_size)).clamp(-1,0)
+        grad_step_size =  (value.sign()-value/step_size).clamp(-1,1)
+
+        grad_weight = (-(step_size*value.sign())+value).clamp(-1,1)
 
         weight_grad = (1 - torch.pow(torch.tanh(value), 2))
 
-        grad_step_size = -lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+        #grad_step_size = -lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         ##grad_step_size = lower*gradLower + higher*gradMiddle + middle*gradMiddle
 
-        return grad_output*weight_grad, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
+        return grad_output*grad_weight, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 
 class scale_out(Function):
@@ -187,8 +190,8 @@ class BinarizeConv2d(nn.Conv2d):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
-        #self.alpha = Parameter(torch.ones(self.weight.size(0)))
-        self.alpha = Parameter(torch.ones(1))
+        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        #self.alpha = Parameter(torch.ones(1))
         self.beta = Parameter(torch.ones(1))
         self.register_buffer('init_state', torch.zeros(1))
 
@@ -197,32 +200,35 @@ class BinarizeConv2d(nn.Conv2d):
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
-            #self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1_)
+            '''
             if input.size(1) != 3:
                 self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
             else:
                 self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
+            '''
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizet.apply(input)
+            #inputq = Binarizet.apply(input)
+            inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
-            #input = LSQbi.apply(input,self.beta,1)
 
 
 
-        wq=Binarizet.apply(self.weight)
-        #wq = LSQbi.apply(self.weight, self.alpha,1)
+
+        #wq=Binarizet.apply(self.weight)
+        wq = LSQbi.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
 
 
-        out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
+        #out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
         if not self.bias is None:
             self.bias.org=self.bias.data.clone()
