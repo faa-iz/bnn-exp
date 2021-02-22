@@ -206,8 +206,8 @@ class BinarizeConv2d(nn.Conv2d):
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
-            input_c = input.clamp(-1,1)
-            inputq = Binarizet.apply(input_c)
+            #input_c = input.clamp(-1,1)
+            inputq = Binarizet.apply(input)
         else:
             inputq = input
             #input = LSQbi.apply(input,self.beta,1)
