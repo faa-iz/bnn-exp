@@ -211,6 +211,13 @@ class ResNet_cifar10(ResNet):
         #    164: {'lr': 1e-6}
         #}
         self.regime = {
+            0: {'optimizer': 'SGD', 'lr': 1e-1,
+                'weight_decay': 1e-4, 'momentum': 0.9},
+            30: {'lr': 1e-2},
+            60: {'lr': 1e-3, 'weight_decay': 0},
+            90: {'lr': 1e-4}
+        }
+        self.regimed = {
             0: {'optimizer': 'Adam', 'lr': 5e-3},
             101: {'lr': 1e-3},
             142: {'lr': 5e-4},
