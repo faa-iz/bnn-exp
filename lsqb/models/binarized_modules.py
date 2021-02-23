@@ -74,7 +74,7 @@ class LSQbi(Function):
         #gradHigher = (Qp - (value/step_size)).clamp(-1,0)
         grad_step_size =  nn.functional.tanh(value.sign()-value/step_size)
 
-        grad_weight = nn.functional.tanh(-(step_size*value.sign())+value)
+        grad_weight = nn.functional.tanh(-(step_size*value.sign())+value).abs()
 
         weight_grad = (1 - torch.pow(torch.tanh(value), 2))
 
