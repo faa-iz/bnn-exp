@@ -81,7 +81,7 @@ class LSQbi(Function):
         #grad_step_size = -lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         ##grad_step_size = lower*gradLower + higher*gradMiddle + middle*gradMiddle
 
-        return grad_output*grad_weight, (grad_output*grad_step_size).mean().unsqueeze(dim=0), None
+        return grad_output*weight_grad, (grad_output*grad_step_size).mean().unsqueeze(dim=0), None
 
 
 class scale_out(Function):
@@ -213,16 +213,16 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizet.apply(input)
-            #inputq = LSQbi.apply(input,self.beta,1)
+            #inputq = Binarizet.apply(input)
+            inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
 
 
 
 
-        wq=Binarizet.apply(self.weight)
-        #wq = LSQbi.apply(self.weight, self.alpha,1)
+        #wq=Binarizet.apply(self.weight)
+        wq = LSQbi.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
