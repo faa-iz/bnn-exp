@@ -66,8 +66,8 @@ class LSQbi(Function):
         Qp = 1
         grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
 
-        lower = (value/step_size <= Qn).float()
-        higher = (value/step_size >= Qp).float()
+        lower = (value/step_size <= Qn-0.5).float()
+        higher = (value/step_size >= Qp+0.5).float()
         middle = (1.0 - higher - lower)
 
         gradLower = -1#(Qn - (value/step_size)).clamp(0,1)
