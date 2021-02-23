@@ -227,7 +227,7 @@ class BinarizeConv2d(nn.Conv2d):
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
-        out = out * self.alpha * self.beta
+        #out = out * self.alpha * self.beta
 
         #out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
