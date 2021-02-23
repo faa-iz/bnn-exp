@@ -72,7 +72,7 @@ class LSQbi(Function):
 
         gradLower = -1#(Qn - (value/step_size)).clamp(0,1)
         gradHigher = +1#(Qp - (value/step_size)).clamp(-1,0)
-        gradMiddle =  nn.functional.tanh(value.sign()-(value/step_size))
+        gradMiddle = value.sign()-(value/step_size)
 
         grad_weight = nn.functional.tanh(-(step_size*value.sign())+value).abs()
 
