@@ -19,10 +19,11 @@ def Binarize(tensor,quant_mode='det'):
 
 class Binarizet(Function):
     @staticmethod
-    def forward(ctx, tensor):
+    def forward(ctx, tensor,scale):
         ctx.tensor = tensor
+        ctx.scale = scale
         #if quant_mode == 'det':
-        out =  tensor.sign()
+        out =  tensor.sign()*scale
         return out
         #else:
         #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
@@ -30,9 +31,28 @@ class Binarizet(Function):
     @staticmethod
     def backward(ctx, grad_output):
         #print(ctx)
-        tensor= ctx.tensor
-        grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
-        return grad_input, None, None
+        value= ctx.tensor
+        step_size = ctx.scale
+        #grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
+        Qn = -1
+        Qp = 1
+        grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
+
+        lower = (value / step_size <= Qn - 0.5).float()
+        higher = (value / step_size >= Qp + 0.5).float()
+        middle = (1.0 - higher - lower)
+
+        gradLower = 1  # (Qn - (value/step_size)).clamp(0,1)
+        gradHigher = -1  # (Qp - (value/step_size)).clamp(-1,0)
+        gradMiddle = value.sign() - (value / step_size)
+
+        grad_weight = nn.functional.tanh(-(step_size * value.sign()) + value).abs()
+
+        weight_grad = (1 - torch.pow(torch.tanh(value), 2))
+
+        # grad_step_size = -lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+        grad_step_size = lower * gradLower + higher * gradHigher + middle * gradMiddle
+        return grad_output*-grad_step_size*grad_scale, None
 
 class LSQbi(Function):
     @staticmethod
@@ -190,8 +210,8 @@ class BinarizeConv2d(nn.Conv2d):
 
     def __init__(self, *kargs, **kwargs):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
-        #self.alpha = Parameter(torch.ones(self.weight.size(0)))
-        self.alpha = Parameter(torch.ones(1))
+        self.alpha = Parameter(torch.ones(self.weight.size(0)))
+        #self.alpha = Parameter(torch.ones(1))
         self.beta = Parameter(torch.ones(1))
         self.register_buffer('init_state', torch.zeros(1))
 
@@ -200,20 +220,20 @@ class BinarizeConv2d(nn.Conv2d):
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
-            #self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             '''
             if input.size(1) != 3:
                 self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
             else:
                 self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
             '''
-            self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
+            #self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
-            self.init_state.fill_(1)
+            #self.init_state.fill_(1)
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizet.apply(input)
+            inputq = Binarizet.apply(input,init2)
             #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
@@ -221,8 +241,8 @@ class BinarizeConv2d(nn.Conv2d):
 
 
 
-        #wq=Binarizet.apply(self.weight)
-        wq = LSQbi.apply(self.weight, self.alpha,1)
+        wq=Binarizet.apply(self.weight,init1)
+        #wq = LSQbi.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
