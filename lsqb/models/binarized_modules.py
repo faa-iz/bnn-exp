@@ -207,14 +207,14 @@ class BinarizeConv2d(nn.Conv2d):
             else:
                 self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
             '''
-            self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
+            self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            #inputq = Binarizet.apply(input)
-            inputq = LSQbi.apply(input,self.beta,1)
+            inputq = Binarizet.apply(input)
+            #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
 
