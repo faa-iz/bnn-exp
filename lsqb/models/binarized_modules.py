@@ -23,7 +23,7 @@ class Binarizet(Function):
         ctx.tensor = tensor
         ctx.scale = scale
         #if quant_mode == 'det':
-        out =  tensor.sign()*scale
+        out =  tensor.sign()
         return out
         #else:
         #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
@@ -233,7 +233,7 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizet.apply(input,init2)
+            inputq = Binarizet.apply(input,init2)*init2
             #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
@@ -241,7 +241,7 @@ class BinarizeConv2d(nn.Conv2d):
 
 
 
-        wq=Binarizet.apply(self.weight,init1)
+        wq=Binarizet.apply(self.weight,init1)*init1.view(self.weight.size(0),1,1,1)
         #wq = LSQbi.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
