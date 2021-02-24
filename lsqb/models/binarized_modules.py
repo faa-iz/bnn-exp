@@ -86,6 +86,59 @@ class LSQbi(Function):
         return grad_output*-grad_step_size*grad_scale, (grad_output*grad_step_size*grad_scale).mean().unsqueeze(dim=0), None
 
 
+
+
+class LSQbw(Function):
+    @staticmethod
+    def forward(self, value, step_size, nbits):
+        #print('forward2')
+        #print('-------------')
+        #print(step_size.data)
+        #value  =  torch.where(value > step_size,step_size,value)
+        #value  =  torch.where(value < -step_size,-step_size,value)
+
+        self.save_for_backward(value, step_size)
+        self.other = nbits
+
+        #set levels
+        Qn = -1
+        Qp = 1
+
+        #v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type()
+        v_bar = value.sign()
+        v_hat = v_bar*step_size.view(value.shape[0],1,1,1)
+        return v_hat
+
+    @staticmethod
+    def backward(self, grad_output):
+        #print('backward2')
+        value, step_size = self.saved_tensors
+        nbits = self.other
+
+        #set levels
+        Qn = -1
+        Qp = 1
+        grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
+
+        lower = (value/step_size.view(value.shape[0],1,1,1) <= Qn-0.5).float()
+        higher = (value/step_size.view(value.shape[0],1,1,1) >= Qp+0.5).float()
+        middle = (1.0 - higher - lower)
+
+        gradLower = 1#(Qn - (value/step_size)).clamp(0,1)
+        gradHigher = -1#(Qp - (value/step_size)).clamp(-1,0)
+        gradMiddle = value.sign()-(value/step_size.view(value.shape[0],1,1,1))
+
+        grad_weight = nn.functional.tanh(-(step_size*value.sign())+value).abs()
+
+        weight_grad = (1 - torch.pow(torch.tanh(value), 2))
+
+        #grad_step_size = -lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
+        grad_step_size = lower*gradLower + higher*gradHigher + middle*gradMiddle
+
+        return grad_output*-grad_step_size*grad_scale, (grad_output*grad_step_size*grad_scale).view(value(0), -1).mean(-1).unsqueeze(dim=0), None
+
+
+
 class scale_out(Function):
 
     @staticmethod
@@ -211,25 +264,25 @@ class BinarizeConv2d(nn.Conv2d):
             '''
             #self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
-            #self.init_state.fill_(1)
+            self.init_state.fill_(1)
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizet.apply(input)
-            #inputq = LSQbi.apply(input,self.beta,1)
+            #inputq = Binarizet.apply(input)
+            inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
 
 
 
 
-        wq=Binarizet.apply(self.weight)
-        #wq = LSQbi.apply(self.weight, self.alpha,1)
+        #wq=Binarizet.apply(self.weight)
+        wq = LSQbw.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
-        out = out * self.alpha.view(1,out.shape[1],1,1) * self.beta
+        #out = out * self.alpha.view(1,out.shape[1],1,1) * self.beta
 
         #out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
