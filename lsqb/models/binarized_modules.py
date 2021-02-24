@@ -215,7 +215,7 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizet.apply(input,init2)
+            inputq = Binarizet.apply(input)
             #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
@@ -223,13 +223,13 @@ class BinarizeConv2d(nn.Conv2d):
 
 
 
-        wq=Binarizet.apply(self.weight,init1)
+        wq=Binarizet.apply(self.weight)
         #wq = LSQbi.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
-        #out = out * self.alpha * self.beta
+        out = out * self.alpha.view(self.weight.size(0),1,1,1) * self.beta
 
         #out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
