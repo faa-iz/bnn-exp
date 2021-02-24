@@ -128,7 +128,7 @@ class LSQbw(Function):
         gradHigher = -1#(Qp - (value/step_size)).clamp(-1,0)
         gradMiddle = value.sign()-(value/step_size.view(value.shape[0],1,1,1))
 
-        grad_weight = nn.functional.tanh(-(step_size*value.sign())+value).abs()
+        #grad_weight = nn.functional.tanh(-(step_size*value.sign())+value).abs()
 
         grad_input = (torch.tanh(1/(1000*tensor))).abs() * grad_output
 
