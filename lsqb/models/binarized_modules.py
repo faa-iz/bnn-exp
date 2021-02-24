@@ -32,7 +32,7 @@ class Binarizet(Function):
     def backward(ctx, grad_output):
         #print(ctx)
         tensor= ctx.tensor
-        grad_input = -(torch.tanh(1/(10*tensor))) * grad_output
+        grad_input = (torch.tanh(1/(10*tensor))).abs() * grad_output
         return grad_input, None, None
 
 
