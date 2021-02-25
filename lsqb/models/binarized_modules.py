@@ -67,19 +67,19 @@ class LSQbi(Function):
         nbits = self.other
 
         #set levels
-        Qn = -1
-        Qp = 1
+        Qn = -0.5
+        Qp = 1.5
         grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
 
-        lower = (value/step_size <= Qn-0.5).float()
-        higher = (value/step_size >= Qp+0.5).float()
+        lower =  ((value/step_size +0.5) <= Qn).float()
+        higher = ((value/step_size +0.5)>= Qp).float()
         middle = (1.0 - higher - lower)
 
         gradLower = 1#(Qn - (value/step_size)).clamp(0,1)
         gradHigher = -1#(Qp - (value/step_size)).clamp(-1,0)
-        gradMiddle = value.sign()-(value/step_size)
+        gradMiddle = 2*((value/step_size)+0.5).round()-(2*value/step_size) - 1
 
-        grad_input = (1 - pow(torch.tanh((a*value/b)),2) )* grad_output
+        grad_input = (1 - pow(torch.tanh(value),2) )* grad_output
 
         weight_grad = (1 - torch.pow(torch.tanh(value), 2))
 
