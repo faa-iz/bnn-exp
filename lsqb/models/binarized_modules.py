@@ -67,8 +67,8 @@ class LSQbi(Function):
         nbits = self.other
 
         #set levels
-        Qn = -0.5
-        Qp = 1.5
+        Qn = 0
+        Qp = 1
         grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
 
         lower =  ((value/step_size +0.5) <= Qn).float()
@@ -119,8 +119,8 @@ class LSQbw(Function):
         nbits = self.other
 
         #set levels
-        Qn = -0.5
-        Qp = 1.5
+        Qn = 0
+        Qp = 1
         grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
 
         lower = ((value / step_size.view(value.shape[0],1,1,1) + 0.5) <= Qn).float()
