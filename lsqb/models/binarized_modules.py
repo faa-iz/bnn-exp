@@ -86,7 +86,7 @@ class LSQbi(Function):
         #grad_step_size = -lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         grad_step_size = lower*gradLower + higher*gradHigher + middle*gradMiddle
 
-        return grad_input, (grad_output*grad_step_size*grad_scale).mean().unsqueeze(dim=0), None
+        return grad_input, (grad_output*grad_step_size*grad_scale).sum().unsqueeze(dim=0), None
 
 
 
@@ -119,26 +119,26 @@ class LSQbw(Function):
         nbits = self.other
 
         #set levels
-        Qn = -1
-        Qp = 1
+        Qn = -0.5
+        Qp = 1.5
         grad_scale = 1.0 / (math.sqrt(value.numel() * Qp))
 
-        lower = (value/step_size.view(value.shape[0],1,1,1) <= Qn-0.5).float()
-        higher = (value/step_size.view(value.shape[0],1,1,1) >= Qp+0.5).float()
+        lower = ((value / step_size.view(value.shape[0],1,1,1) + 0.5) <= Qn).float()
+        higher = ((value / step_size.view(value.shape[0],1,1,1) + 0.5) >= Qp).float()
         middle = (1.0 - higher - lower)
 
         gradLower = 1#(Qn - (value/step_size)).clamp(0,1)
         gradHigher = -1#(Qp - (value/step_size)).clamp(-1,0)
-        gradMiddle = value.sign()-(value/step_size.view(value.shape[0],1,1,1))
+        gradMiddle = 2*((value/step_size.view(value.shape[0],1,1,1))+0.5).round()-(2*value/step_size.view(value.shape[0],1,1,1)) - 1
 
         #grad_weight = nn.functional.tanh(-(step_size*value.sign())+value).abs()
 
-        grad_input = (1 - pow(torch.tanh((a*value/b)),2) )* grad_output
+        grad_input = (1 - pow(torch.tanh(value),2) )* grad_output
 
         #grad_step_size = -lower*Qn + higher*Qp + middle*(-value/step_size + (value/step_size).round())
         grad_step_size = lower*gradLower + higher*gradHigher + middle*gradMiddle
 
-        return grad_input, (grad_output*grad_step_size*grad_scale).view(value.size(0), -1).mean(-1), None
+        return grad_input, (grad_output*grad_step_size*grad_scale).view(value.size(0), -1).sum(-1), None
 
 
 
