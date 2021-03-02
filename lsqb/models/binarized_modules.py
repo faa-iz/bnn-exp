@@ -56,8 +56,16 @@ class Binarizetact(Function):
         #print(ctx)
         tensor= ctx.tensor
         shift = ctx.shift
-        grad_input = (1 - torch.pow(torch.tanh(tensor-shift.view(1,tensor.shape[1],1,1)), 2)) * grad_output
-        return grad_input, None, None
+        tensor_s = (tensor - shift).clamp(1,-1)
+
+        lower = ((tensor_s) <= 0).float()
+        higher = ((tensor_s) < 0).float()
+
+
+
+        grad_input1 = (1 - torch.pow(torch.tanh(tensor-shift.view(1,tensor.shape[1],1,1)), 2)) * grad_output
+        grad_input2 =  lower*(tensor_s-1) + higher*(1-tensor_s)
+        return grad_input1 + grad_input2, None, None
 
 
 class LSQbi(Function):
