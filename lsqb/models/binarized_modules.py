@@ -56,15 +56,15 @@ class Binarizetact(Function):
         #print(ctx)
         tensor= ctx.tensor
         shift = ctx.shift
-        tensor_s = (tensor - shift.view(1,tensor.shape[1],1,1)).clamp(1,-1)
+        tensor = (tensor - shift.view(1,tensor.shape[1],1,1)).clamp(1,-1)
 
-        lower = ((tensor_s) <= 0).float()
-        higher = ((tensor_s) < 0).float()
+        lower = ((tensor) <= 0).float()
+        higher = ((tensor) < 0).float()
 
 
 
-        grad_input1 = (1 - torch.pow(torch.tanh(tensor-shift.view(1,tensor.shape[1],1,1)), 2)) * grad_output
-        grad_input2 =  lower*(tensor_s-1) + higher*(1-tensor_s)
+        grad_input1 = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
+        grad_input2 =  lower*(tensor-1) + higher*(1-tensor)
         return grad_input1 + grad_input2, None, None
 
 
