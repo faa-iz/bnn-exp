@@ -36,7 +36,7 @@ class Binarizet(Function):
         #print(ctx)
         tensor= ctx.tensor
         grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
-        return grad_input, None, None
+        return grad_input
 
 
 class Binarizetact(Function):
@@ -283,9 +283,9 @@ class BinarizeConv2d(nn.Conv2d):
     def forward(self, input):
         if self.init_state == 0:
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
-            init1_ = self.weight.abs().mean()
+            #init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
-            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
+            self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1*init2)
             self.beta.data.copy_((torch.rand(self.weight.size(1)).cuda() * 0.01)+0.0001)
             self.init_state.fill_(1)
 
