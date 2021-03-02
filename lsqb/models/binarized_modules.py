@@ -62,12 +62,12 @@ class Binarizetact(Function):
 
         grad_input1 = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
 
-        #tensor._clamp(-1,1)
-        #high_grad = (1-tensor)*higher
-        #low_grad = (-1-tensor)*lower
+        tensor._clamp(-1,1)
+        high_grad = (1-tensor)*higher
+        low_grad = (-1-tensor)*lower
 
-        #grad_input2 =  low_grad + high_grad
-        return grad_input1 #+ grad_input2
+        grad_input2 =  low_grad + high_grad
+        return grad_input1 + grad_input2
 
 
 class LSQbi(Function):
