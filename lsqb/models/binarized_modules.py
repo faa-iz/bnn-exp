@@ -67,7 +67,7 @@ class Binarizetact(Function):
         low_grad = (-1-tensor)*lower
 
         grad_input2 =  low_grad + higher
-        return grad_input1 + grad_input2
+        return grad_input1# + grad_input2
 
 
 class LSQbi(Function):
