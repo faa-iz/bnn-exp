@@ -56,7 +56,7 @@ class Binarizetact(Function):
         #print(ctx)
         tensor= ctx.tensor
         shift = ctx.shift
-        tensor_s = (tensor - shift).clamp(1,-1)
+        tensor_s = (tensor - shift.view(1,tensor.shape[1],1,1)).clamp(1,-1)
 
         lower = ((tensor_s) <= 0).float()
         higher = ((tensor_s) < 0).float()
