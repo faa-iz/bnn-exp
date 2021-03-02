@@ -53,7 +53,7 @@ class Binarizetact(Function):
     def backward(ctx, grad_output):
         #print(ctx)
         tensor= ctx.tensor
-        tensor = (tensor - shift.view(1,tensor.shape[1],1,1)).clamp(1,-1)
+
 
         lower = ((tensor) <= 0).float()
         higher = ((tensor) < 0).float()
@@ -61,7 +61,7 @@ class Binarizetact(Function):
 
 
         grad_input1 = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
-        #grad_input2 =  lower*(tensor-1) + higher*(1-tensor)
+        #grad_input2 =  lower*(tensor.clamp(1,-1)-1) + higher*(1-tensor.clamp(1,-1))
         return grad_input1
 
 
