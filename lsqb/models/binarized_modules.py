@@ -251,7 +251,7 @@ class BinarizeConv2d(nn.Conv2d):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
         self.alpha = Parameter(torch.ones(self.weight.size(0)))
         #self.alpha = Parameter(torch.ones(1))
-        self.beta = Parameter(torch.ones(1))
+        self.beta = Parameter(torch.rand(self.weight.size(0)))
         self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, input):
@@ -260,33 +260,26 @@ class BinarizeConv2d(nn.Conv2d):
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
-            '''
-            if input.size(1) != 3:
-                self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
-            else:
-                self.alpha.data.copy_(torch.ones(1).cuda() * init1_)
-            '''
-            #self.alpha.data.copy_(torch.ones(1).cuda() * init1_*init2)
-            self.beta.data.copy_(torch.ones(1).cuda() * init2)
+            self.beta.data.copy_(torch.rand(self.weight.size(0)).cuda() * 0.1)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            #inputq = Binarizet.apply(input)
-            inputq = LSQbi.apply(input,self.beta,1)
+            inputq = Binarizetact.apply(input)
+            #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
 
 
 
 
-        #wq=Binarizet.apply(self.weight)
-        wq = LSQbw.apply(self.weight, self.alpha,1)
+        wq=Binarizet.apply(self.weight)
+        #wq = LSQbw.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
-        #out = out * self.alpha.view(1,out.shape[1],1,1) * self.beta
+        out = out * self.alpha.view(1,out.shape[1],1,1) * self.beta
 
         #out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
