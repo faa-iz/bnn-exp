@@ -35,7 +35,28 @@ class Binarizet(Function):
     def backward(ctx, grad_output):
         #print(ctx)
         tensor= ctx.tensor
-        grad_input = (torch.tanh(1/(1000*tensor))).abs() * grad_output
+        grad_input = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
+        return grad_input, None, None
+
+
+class Binarizetact(Function):
+    @staticmethod
+    def forward(ctx, tensor,shift):
+        ctx.tensor = tensor
+        ctx.shift = shift
+        #if quant_mode == 'det':
+        tensor = tensor - shift
+        out =  tensor.sign()
+        return out
+        #else:
+        #    return tensor.add_(1).div_(2).add_(torch.rand(tensor.size()).add(-0.5)).clamp_(0, 1).round().mul_(2).add_(-1)
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        #print(ctx)
+        tensor= ctx.tensor
+        shift = ctx.shift
+        grad_input = (1 - torch.pow(torch.tanh(tensor-shift), 2)) * grad_output
         return grad_input, None, None
 
 
@@ -265,7 +286,7 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizetact.apply(input)
+            inputq = Binarizetact.apply(input, self.beta)
             #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
