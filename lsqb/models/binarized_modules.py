@@ -41,11 +41,9 @@ class Binarizet(Function):
 
 class Binarizetact(Function):
     @staticmethod
-    def forward(ctx, tensor,shift):
+    def forward(ctx, tensor):
         ctx.tensor = tensor
-        ctx.shift = shift
         #if quant_mode == 'det':
-        tensor = tensor - shift.view(1,tensor.shape[1],1,1)
         out =  tensor.sign()
         return out
         #else:
@@ -55,7 +53,6 @@ class Binarizetact(Function):
     def backward(ctx, grad_output):
         #print(ctx)
         tensor= ctx.tensor
-        shift = ctx.shift
         tensor = (tensor - shift.view(1,tensor.shape[1],1,1)).clamp(1,-1)
 
         lower = ((tensor) <= 0).float()
@@ -65,7 +62,7 @@ class Binarizetact(Function):
 
         grad_input1 = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
         #grad_input2 =  lower*(tensor-1) + higher*(1-tensor)
-        return grad_input1, -grad_output
+        return grad_input1
 
 
 class LSQbi(Function):
@@ -294,7 +291,8 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            inputq = Binarizetact.apply(input, self.beta)
+            input = input - self.beta.view(1,input.shape[1],1,1)
+            inputq = Binarizetact.apply(input)
             #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
