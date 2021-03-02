@@ -272,7 +272,7 @@ class BinarizeConv2d(nn.Conv2d):
         super(BinarizeConv2d, self).__init__(*kargs, **kwargs)
         self.alpha = Parameter(torch.ones(self.weight.size(0)))
         #self.alpha = Parameter(torch.ones(1))
-        self.beta = Parameter(torch.rand(input.size(1)))
+        self.beta = Parameter(torch.rand(self.weight.size(1)))
         self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, input):
@@ -281,7 +281,7 @@ class BinarizeConv2d(nn.Conv2d):
             init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
-            self.beta.data.copy_(torch.rand(input.size(1)).cuda() * 0.01)
+            self.beta.data.copy_(torch.rand(self.weight.size(1)).cuda() * 0.01)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
