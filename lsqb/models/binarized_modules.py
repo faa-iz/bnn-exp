@@ -63,8 +63,8 @@ class Binarizetact(Function):
         grad_input1 = (1 - torch.pow(torch.tanh(tensor), 2)) * grad_output
 
         tensor.clamp_(-0.001,0.001)
-        high_grad = (0.001-tensor)*higher*1000
-        low_grad = (-0.001-tensor)*lower*1000
+        high_grad = (-0.001+tensor)*higher*1000
+        low_grad = (0.001+tensor)*lower*1000
 
         grad_input2 =  low_grad + high_grad
         return grad_input1 + grad_input2
