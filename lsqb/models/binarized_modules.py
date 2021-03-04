@@ -313,7 +313,7 @@ class BinarizeConv2d(nn.Conv2d):
 
         #wq=Binarizet.apply(self.weight)
         wq = LSQbw.apply(self.weight, self.alpha,1)
-
+        print(wq)
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
