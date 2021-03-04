@@ -21,7 +21,7 @@ def Binarize(tensor,quant_mode='det'):
 
 
 
-def LSQbif(value, step_size, nbits):
+def LSQbif(value, step_size, thresh):
         #print('forward2')
         #print('-------------')
         #print(step_size.data)
@@ -31,8 +31,8 @@ def LSQbif(value, step_size, nbits):
         #self.save_for_backward(value, step_size)
         #self.other = nbits
 
-        v_max = value.abs().mean()
-        v_neg = (value - v_max) / 2
+        #v_max = value.abs().mean()
+        v_neg = (value - thresh) / 2
         v_bar = (v_neg / step_size).clamp(-1.49, 0.49).round()
         v_hat = ((v_bar * 2) + 1) * step_size
         return v_hat
@@ -335,9 +335,10 @@ class BinarizeConv2d(nn.Conv2d):
             init1 = self.weight.abs().view(self.weight.size(0), -1).mean(-1)
             #init1_ = self.weight.abs().mean()
             init2 =  input.abs().mean()
+            init3 = input.abs().mean()
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
-            self.gama.data.copy_(torch.ones(1).cuda() * init2)
+            self.gama.data.copy_(torch.ones(1).cuda() * init3)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
