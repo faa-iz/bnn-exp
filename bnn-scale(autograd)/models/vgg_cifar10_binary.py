@@ -64,8 +64,8 @@ class VGG_Cifar10(nn.Module):
             40: {'lr': 1e-3},
             80: {'lr': 5e-4},
             100: {'lr': 1e-4},
-            120: {'lr': 5e-5},
-            140: {'lr': 1e-5}
+           [ 120: {'lr': 5e-5},
+            140: {'lr': 1e-5}]
         }
 
     def forward(self, x):
