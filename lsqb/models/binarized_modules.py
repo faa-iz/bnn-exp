@@ -21,7 +21,7 @@ def Binarize(tensor,quant_mode='det'):
 
 
 
-def LSQbif(self, value, step_size, nbits):
+def LSQbif(value, step_size, nbits):
         #print('forward2')
         #print('-------------')
         #print(step_size.data)
@@ -37,7 +37,7 @@ def LSQbif(self, value, step_size, nbits):
         v_hat = ((v_bar * 2) + 1) * step_size
         return v_hat
 
-def LSQbwf(self, value, step_size, nbits):
+def LSQbwf(value, step_size, nbits):
         #print('forward2')
         #print('-------------')
         #print(step_size.data)
