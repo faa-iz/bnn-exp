@@ -132,6 +132,7 @@ class LSQbw(Function):
         #value  =  torch.where(value > step_size,step_size,value)
         #value  =  torch.where(value < -step_size,-step_size,value)
 
+
         self.save_for_backward(value, step_size)
         self.other = nbits
 
@@ -140,10 +141,14 @@ class LSQbw(Function):
         Qp = 1
 
         #v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type()
-        v_bar = value.sign()
-        v_hat = v_bar*step_size.view(value.shape[0],1,1,1)
-        return v_hat
+        v_max = value.abs().mean()
+        v_neg = (value - v_max) / 2
+        v_bar = (v_neg / step_size.view(value.shape[0], 1, 1, 1)).clamp(-1.49, 0.49).round()
+        v_hat = ((v_bar * 2) + 1) * step_size.view(value.shape[0], 1, 1, 1)
 
+
+        return v_hat
+    '''
     @staticmethod
     def backward(self, grad_output):
         #print('backward2')
@@ -172,7 +177,7 @@ class LSQbw(Function):
 
         #return grad_input, (grad_output*grad_step_size*grad_scale).view(value.size(0), -1).mean(-1), None
         return grad_output, (grad_output*value.sign()).view(value.size(0), -1).mean(-1), None
-
+        '''
 
 
 class scale_out(Function):
@@ -297,8 +302,8 @@ class BinarizeConv2d(nn.Conv2d):
 
         if input.size(1) != 3:
             #input_c = input.clamp(-1,1)
-            input = input - self.beta.view(1,input.shape[1],1,1)
-            inputq = Binarizetact.apply(input)
+            #input = input - self.beta.view(1,input.shape[1],1,1)
+            inputq = Binarizet.apply(input)
             #inputq = LSQbi.apply(input,self.beta,1)
         else:
             inputq = input
@@ -306,8 +311,8 @@ class BinarizeConv2d(nn.Conv2d):
 
 
 
-        wq=Binarizet.apply(self.weight)
-        #wq = LSQbw.apply(self.weight, self.alpha,1)
+        #wq=Binarizet.apply(self.weight)
+        wq = LSQbw.apply(self.weight, self.alpha,1)
 
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
