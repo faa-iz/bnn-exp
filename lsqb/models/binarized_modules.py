@@ -327,6 +327,7 @@ class BinarizeConv2d(nn.Conv2d):
         self.alpha = Parameter(torch.ones(self.weight.size(0)))
         #self.alpha = Parameter(torch.ones(1))
         self.beta = Parameter(torch.ones(1))
+        self.gama = Parameter(torch.ones(1))
         self.register_buffer('init_state', torch.zeros(1))
 
     def forward(self, input):
@@ -336,6 +337,7 @@ class BinarizeConv2d(nn.Conv2d):
             init2 =  input.abs().mean()
             self.alpha.data.copy_(torch.ones(self.weight.size(0)).cuda() * init1)
             self.beta.data.copy_(torch.ones(1).cuda() * init2)
+            self.gama.data.copy_(torch.ones(1).cuda() * init2)
             self.init_state.fill_(1)
 
         if input.size(1) != 3:
@@ -355,7 +357,7 @@ class BinarizeConv2d(nn.Conv2d):
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
 
-        out = out * self.alpha.view(1,out.shape[1],1,1)
+        #out = out * self.alpha.view(1,out.shape[1],1,1)
 
         #out =  scale_out.apply(self.stride,self.padding,self.dilation,self.groups, out,self.weight,input,self.alpha)
 
