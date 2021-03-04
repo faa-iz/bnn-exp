@@ -21,6 +21,47 @@ def Binarize(tensor,quant_mode='det'):
 
 
 
+def LSQbif(self, value, step_size, nbits):
+        #print('forward2')
+        #print('-------------')
+        #print(step_size.data)
+        #value  =  torch.where(value > step_size,step_size,value)
+        #value  =  torch.where(value < -step_size,-step_size,value)
+
+        #self.save_for_backward(value, step_size)
+        #self.other = nbits
+
+        v_max = value.abs().mean()
+        v_neg = (value - v_max) / 2
+        v_bar = (v_neg / step_size).clamp(-1.49, 0.49).round()
+        v_hat = ((v_bar * 2) + 1) * step_size
+        return v_hat
+
+def LSQbwf(self, value, step_size, nbits):
+        #print('forward2')
+        #print('-------------')
+        #print(step_size.data)
+        #value  =  torch.where(value > step_size,step_size,value)
+        #value  =  torch.where(value < -step_size,-step_size,value)
+
+
+        #self.save_for_backward(value, step_size)
+        #self.other = nbits
+
+        #set levels
+        Qn = -1
+        Qp = 1
+
+        #v_bar = (value >= 0).type(value.type()) - (value < 0).type(value.type()
+        v_max = value.abs().mean()
+        v_neg = (value - v_max) / 2
+        v_bar = (v_neg / step_size.view(value.shape[0], 1, 1, 1)).clamp(-1.49, 0.49).round()
+        v_hat = ((v_bar * 2) + 1) * step_size.view(value.shape[0], 1, 1, 1)
+
+
+        return v_hat
+
+
 class Binarizet(Function):
     @staticmethod
     def forward(ctx, tensor):
@@ -301,7 +342,7 @@ class BinarizeConv2d(nn.Conv2d):
             #input_c = input.clamp(-1,1)
             #input = input - self.beta.view(1,input.shape[1],1,1)
             #inputq = Binarizet.apply(input)
-            inputq = LSQbi(input,self.beta.abs(),1)
+            inputq = LSQbif(input,self.beta.abs(),1)
         else:
             inputq = input
 
@@ -309,7 +350,7 @@ class BinarizeConv2d(nn.Conv2d):
 
 
         #wq=Binarizet.apply(self.weight)
-        wq = LSQbw(self.weight, self.alpha.abs(),1)
+        wq = LSQbwf(self.weight, self.alpha.abs(),1)
         #print(wq)
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
