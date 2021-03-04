@@ -301,7 +301,7 @@ class BinarizeConv2d(nn.Conv2d):
             #input_c = input.clamp(-1,1)
             #input = input - self.beta.view(1,input.shape[1],1,1)
             #inputq = Binarizet.apply(input)
-            inputq = LSQbi(input,self.beta,1)
+            inputq = LSQbi(input,self.beta.abs(),1)
         else:
             inputq = input
 
@@ -309,7 +309,7 @@ class BinarizeConv2d(nn.Conv2d):
 
 
         #wq=Binarizet.apply(self.weight)
-        wq = LSQbw(self.weight, self.alpha,1)
+        wq = LSQbw(self.weight, self.alpha.abs(),1)
         #print(wq)
         out = nn.functional.conv2d(inputq, wq, None, self.stride,
                                    self.padding, self.dilation, self.groups)
