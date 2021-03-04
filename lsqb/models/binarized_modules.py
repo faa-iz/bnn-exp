@@ -345,7 +345,7 @@ class BinarizeConv2d(nn.Conv2d):
             #input_c = input.clamp(-1,1)
             #input = input - self.beta.view(1,input.shape[1],1,1)
             #inputq = Binarizet.apply(input)
-            inputq = LSQbif(input,self.beta.abs(),1)
+            inputq = LSQbif(input,self.beta.abs(),self.gama.abs())
         else:
             inputq = input
 
